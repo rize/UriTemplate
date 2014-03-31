@@ -2,7 +2,7 @@
 
 This is a URI Template implementation in PHP based on [RFC 6570 URI Template](http://tools.ietf.org/html/rfc6570). In addition to URI expansion, it also supports URI extraction.
 
-[![Total Downloads](https://poser.pugx.org/rize/uri-template/downloads.png)](https://packagist.org/packages/rize/uri-template)
+[![Build Status](https://travis-ci.org/rezigned/grunt-auto-config.png)](https://travis-ci.org/rezigned/grunt-auto-config) [![Total Downloads](https://poser.pugx.org/rize/uri-template/downloads.png)](https://packagist.org/packages/rize/uri-template)
 
 ## Usage
 
@@ -33,7 +33,7 @@ $uri->expand('/search/{term:1}/{term}/{?q*,limit}', [
 >> '/search/j/john/?q=a,b&limit=10'
 ```
 
-`Rize\UriTemplate` was designed with flexibility in minds. So it also accepts `base-uri` as a 1st argument and `default params` as a 2nd argument. This is very useful when you're working with API endpoint.
+`Rize\UriTemplate` accepts `base-uri` as a 1st argument and `default params` as a 2nd argument. This is very useful when you're working with API endpoint.
 
 Take a look at real world example.
 
