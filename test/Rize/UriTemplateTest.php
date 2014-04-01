@@ -238,7 +238,7 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
 
             # Test empty values
             array(
-                '||?empty=|?empty=',
+                '|||',
                 array(
                     'uri'   => '{empty}|{empty*}|{?empty}|{?empty*}',
                     'params' => array(
@@ -379,4 +379,34 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $actual);
     }
 
+    public function testExpandFromFixture()
+    {
+        $dir     = dirname(__DIR__).DIRECTORY_SEPARATOR.'fixtures'.DIRECTORY_SEPARATOR;
+        $files   = array('spec-examples.json', 'spec-examples-by-section.json', 'extended-tests.json');
+        $service = $this->service();
+
+        foreach($files as $file) {
+            $content = json_decode(file_get_contents($dir.$file), $array = true);
+
+            # iterate through each fixture
+            foreach($content as $fixture) {
+                $vars = $fixture['variables'];
+
+                # assert each test cases
+                foreach($fixture['testcases'] as $case) {
+                    list($uri, $expected) = $case;
+
+                    $actual = $service->expand($uri, $vars);
+
+                    if (is_array($expected)) {
+                        $expected = current(array_filter($expected, function($input) use ($actual) {
+                            return $actual === $input;
+                        }));
+                    }
+
+                    $this->assertEquals($expected, $actual);
+                }
+            }
+        }
+    }
 }

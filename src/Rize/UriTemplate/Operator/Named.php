@@ -66,6 +66,10 @@ class Named extends Abstraction
 
     public function expandNonExplode(Parser $parser, Node\Variable $var, array $val)
     {
+        if (empty($val)) {
+            return;
+        }
+
         $result  = $this->encode($parser, $var, $var->name);
 
         if (empty($val)) {
@@ -81,6 +85,10 @@ class Named extends Abstraction
 
     public function expandExplode(Parser $parser, Node\Variable $var, array $val)
     {
+        if (empty($val)) {
+            return;
+        }
+
         $result  = $this->encode($parser, $var, $var->name);
 
         # RFC6570 doesn't specify how to handle empty list/assoc array

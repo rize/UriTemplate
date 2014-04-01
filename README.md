@@ -1,6 +1,6 @@
 # PHP URI Template
 
-This is a URI Template implementation in PHP based on [RFC 6570 URI Template](http://tools.ietf.org/html/rfc6570). In addition to URI expansion, it also supports URI extraction.
+This is a URI Template implementation in PHP based on [RFC 6570 URI Template](http://tools.ietf.org/html/rfc6570). In addition to URI expansion, it also supports URI extraction (200+ test cases).
 
 [![Build Status](https://travis-ci.org/rezigned/grunt-auto-config.png)](https://travis-ci.org/rezigned/grunt-auto-config) [![Total Downloads](https://poser.pugx.org/rize/uri-template/downloads.png)](https://packagist.org/packages/rize/uri-template)
 
@@ -10,7 +10,7 @@ This is a URI Template implementation in PHP based on [RFC 6570 URI Template](ht
 
 A very simple usage (string expansion).
 
-```
+```php
 <?php
 
 use Rize\UriTemplate;
@@ -23,7 +23,9 @@ $uri->expand('/{username}/profile', ['username' => 'john']);
 
 `Rize\UriTemplate` supports all `Expression Types` and `Levels` specified by RFC6570.
 
-```
+```php
+<?php
+
 $uri->expand('/search/{term:1}/{term}/{?q*,limit}', [
     'term'  => 'john',
     'q'     => ['a', 'b'],
@@ -37,7 +39,9 @@ $uri->expand('/search/{term:1}/{term}/{?q*,limit}', [
 
 Take a look at real world example.
 
-```
+```php
+<?php
+
 $uri = new UriTemplate('https://api.twitter.com/{version}', ['version' => 1.1]);
 $uri->expand('/statuses/show/{id}.json', ['id' => '210462857140252672']);
 
@@ -48,7 +52,7 @@ $uri->expand('/statuses/show/{id}.json', ['id' => '210462857140252672']);
 
 It also supports URI Extraction (extract all variables from URI). Let's take a look at the example.
 
-```
+```php
 <?php
 
 $params = $uri->extract('/search/{term:1}/{term}/{?q*,limit}', '/search/j/john/?q=a&q=b&limit=10');
