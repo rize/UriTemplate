@@ -32,10 +32,20 @@ abstract class Abstraction
     }
 
     /**
-     * Converts current node to regular expression
+     * Matches given URI against current node
+     *
+     * @param Parser $parser
+     * @param string $uri
+     * @param array  $params
      */
-    public function toRegex(Parser $parser)
+    public function match(Parser $parser, $uri, $params = array())
     {
-        return preg_quote($this->token, '#');
+        # match literal string from start to end
+        $length = strlen($this->token);
+        if (($tmp = substr($uri, 0, $length)) === $this->token) {
+            $uri = substr($uri, $length);
+        }
+
+        return array($uri, $params);
     }
 }

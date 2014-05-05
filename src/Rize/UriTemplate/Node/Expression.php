@@ -55,23 +55,42 @@ class Expression extends Abstraction
         return $params;
     }
 
-    public function toRegex(Parser $parser)
+    /**
+     * Matches given URI against current node
+     *
+     * @param Parser $parser
+     * @param string $uri
+     * @param array  $params
+     */
+    public function match(Parser $parser, $uri, $params = array())
     {
-        $regex = array();
-        $op    = $this->operator;
+        $op = $this->operator;
 
-        foreach($this->variables as $var) {
-            $regex[] = '('.$op->toRegex($parser, $var).')';
+        # check expression operator first
+        if ($op->id and $uri[0] !== $op->id) {
+          return array($uri, $params);
         }
 
-        /**
-         * Structure of regex
-         * Note that we only capture vars, not the expression itself
-         *
-         * (?:
-         *   {operator}(var){sep}(var)
-         * )?
-         */
-        return '(?:'.preg_quote($op->id, '#').implode(preg_quote($op->sep, '#'), $regex).')?';
+        # remove operator from input
+        if ($op->id) {
+            $uri = substr($uri, 1);
+        }
+
+        foreach($this->variables as $var) {
+            $regex = '#'.$op->toRegex($parser, $var).'#';
+            $val   = null;
+
+            # var_dump($regex, $uri); echo "\n";
+            if (preg_match($regex, $uri, $match)) {
+
+                # remove matched part from input
+                $uri = preg_replace($regex, '', $uri, $limit = 1);
+                $val = $op->extract($parser, $var, $match[0]);
+            }
+
+            $params[$var->token] = $val;
+        }
+
+        return array($uri, $params);
     }
 }

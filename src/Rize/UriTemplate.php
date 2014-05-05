@@ -10,7 +10,13 @@ use Rize\UriTemplate\Parser;
  */
 class UriTemplate
 {
-    protected $parsed = array();
+             /**
+              * @var Rize\UriTemplate\Parser
+              */
+    protected $parser,
+              $parsed = array(),
+              $base_uri,
+              $params = array();
 
     public function __construct($base_uri = '', $params = array(), Node\Parser $parser = null)
     {
@@ -57,31 +63,12 @@ class UriTemplate
         $params = array();
         $nodes  = $this->parser->parse($template);
 
-        # Steps:
-        # 1. Convert each node to regex
-        # 2. Match each regex against given uri
-        # 3. If matched uri is found, remove the matched uri from uri string,
-        # and continue matching the rest of uri
-
         $regex = array();
 
         foreach($nodes as $node) {
-            $regex[] = $node->toRegex($this->parser);
 
-            if ($node instanceof Node\Expression) {
-
-                $reg = '#'.implode('', $regex).'#';
-
-                if (!preg_match($reg, $uri, $matches)) {
-                    continue;
-                }
-
-                $params += $node->extract($this->parser, array_slice($matches, 1));
-
-                # reset regex and remove matched part from uri
-                $uri     = substr($uri, strlen($matches[0]));
-                $regex   = array();
-            }
+            # uri'll be truncated from the start when a match is found
+            list($uri, $params) = $node->match($this->parser, $uri, $params);
         }
 
         return $params;

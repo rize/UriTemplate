@@ -24,7 +24,8 @@ class Named extends Abstraction
             switch($options['modifier']) {
                 case '*':
                     # 2 | 4
-                    $regex = "{$value}+=(?:{$value}+(?:{$this->sep}{$value}+={$value}*)*)";
+                    $regex = "{$name}+=(?:{$value}+(?:{$this->sep}{$name}+={$value}*)*)"
+                           . "|{$value}+=(?:{$value}+(?:{$this->sep}{$value}+={$value}*)*)";
                     break;
                 case ':':
                     $regex = "{$value}\{0,{$options['value']}\}";

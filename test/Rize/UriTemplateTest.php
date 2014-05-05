@@ -314,7 +314,7 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
                 'http://www.example.com/foo{?query,number}',
                 'http://www.example.com/foo?query=5',
                 array(
-                    'query'  => null,
+                    'query'  => 5,
                     'number' => null,
                 ),
             ),
