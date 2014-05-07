@@ -76,11 +76,10 @@ class Expression extends Abstraction
             $uri = substr($uri, 1);
         }
 
-        foreach($this->variables as $var) {
+        foreach($this->sortVariables($this->variables) as $var) {
             $regex = '#'.$op->toRegex($parser, $var).'#';
             $val   = null;
 
-            # var_dump($regex, $uri); echo "\n";
             if (preg_match($regex, $uri, $match)) {
 
                 # remove matched part from input
@@ -92,5 +91,20 @@ class Expression extends Abstraction
         }
 
         return array($uri, $params);
+    }
+
+    /**
+     * Sort variables before extracting data from uri.
+     * We have to sort vars by non-explode to explode.
+     *
+     * @params array $vars
+     */
+    protected function sortVariables(array $vars)
+    {
+        usort($vars, function($a, $b) {
+            return $a->options['modifier'] >= $b->options['modifier'] ? 1 : -1;
+        });
+
+        return $vars;
     }
 }

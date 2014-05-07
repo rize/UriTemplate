@@ -311,6 +311,16 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
                 ),
             ),
             array(
+                '/search/{term:1}/{term}/{?q*,limit}',
+                '/search/j/john/?a=1&b=2&limit=10',
+                array(
+                    'term:1' => 'j',
+                    'term'   => 'john',
+                    'q'      => array('a' => 1, 'b' => 2),
+                    'limit'  => 10,
+                ),
+            ),
+            array(
                 'http://www.example.com/foo{?query,number}',
                 'http://www.example.com/foo?query=5',
                 array(
