@@ -34,7 +34,7 @@ $uri->expand('/search/{term:1}/{term}/{?q*,limit}', [
     'limit' => 10,
 ])
 
->> '/search/j/john/?q=a,b&limit=10'
+>> '/search/j/john/?q=a&q=b&limit=10'
 ```
 
 `Rize\UriTemplate` accepts `base-uri` as a 1st argument and `default params` as a 2nd argument. This is very useful when you're working with API endpoint.
