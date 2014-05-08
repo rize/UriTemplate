@@ -226,6 +226,11 @@ abstract class Abstraction
         }, $values, array_keys($values)));
     }
 
+    public function decode(Parser $parser, Node\Variable $var, $values)
+    {
+
+    }
+    
     public static function createById($id)
     {
         if (!isset(static::$types[$id])) {

@@ -17,18 +17,13 @@ abstract class Abstraction
 
     /**
      * Expands URI template
+     *
+     * @param Parser $parser
+     * @param array  $params
      */
     public function expand(Parser $parser, array $params = array())
     {
         return $this->token;
-    }
-
-    /**
-     * Extracts variables from URI template
-     */
-    public function extract(Parser $parser, array $params = array())
-    {
-        return array();
     }
 
     /**

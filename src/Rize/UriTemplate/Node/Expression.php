@@ -40,21 +40,6 @@ class Expression extends Abstraction
         return $data ? $op->first.implode($op->sep, $data) : null;
     }
 
-    public function extract(Parser $parser, array $vars = array())
-    {
-        $params   = array();
-        $operator = $this->operator;
-
-        foreach($this->variables as $i => $var) {
-            $val  = isset($vars[$i]) ? $vars[$i] : null;
-            $data = $operator->extract($parser, $var, $val);
-
-            $params[$var->token] = $data === '' ? null : $data;
-        }
-
-        return $params;
-    }
-
     /**
      * Matches given URI against current node
      *
