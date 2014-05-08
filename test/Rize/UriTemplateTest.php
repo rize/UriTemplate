@@ -337,9 +337,9 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
             ),
             array(
                 'http://example.com/{term:1}/{term}/search{?q*,lang}',
-                'http://example.com/j/john/search?q=mycelium&q=3&lang=th,jp,en',
+                'http://example.com/j/john/search?q=Hello%20World%21&q=3&lang=th,jp,en',
                 array(
-                    'q'      => array('mycelium', 3),
+                    'q'      => array('Hello World!', 3),
                     'lang'   => array('th', 'jp', 'en'),
                     'term'   => 'john',
                     'term:1' => 'j',

@@ -130,7 +130,7 @@ class Named extends Abstraction
 
                     # 2
                     if ($k === $var->token) {
-                        $data[] = $v;
+                        $data[]   = $v;
                     }
 
                     # 4
@@ -153,6 +153,6 @@ class Named extends Abstraction
                 }
         }
 
-        return $data;
+        return $this->decode($parser, $var, $data);
     }
 }

@@ -40,36 +40,4 @@ class UnNamed extends Abstraction
 
         return $regex;
     }
-
-    public function extract(Parser $parser, Node\Variable $var, $data)
-    {
-        $value   = $data;
-        $vals    = array_filter(explode($this->sep, $data));
-        $options = $var->options;
-
-        switch ($options['modifier']) {
-
-            case '*':
-                $data = array();
-                foreach($vals as $val) {
-                    
-                    if (strpos($val, '=') !== false) {
-                        list($k, $v) = explode('=', $val);
-                        $data[$k] = $v;
-                    }
-
-                    else {
-                        $data[] = $val;
-                    }
-                }
-
-                break;
-            case ':':
-                break;
-            default:
-                $data = strpos($data, $this->sep) !== false ? $vals : urldecode($value);
-        }
-
-        return $data;
-    }
 }

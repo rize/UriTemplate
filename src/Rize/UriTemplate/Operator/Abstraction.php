@@ -185,11 +185,21 @@ abstract class Abstraction
         return $this->encode($parser, $var, $val);
     }
 
+    /**
+     * Encodes variable according to spec (reserved or unreserved)
+     *
+     * @param  Parser        $parser
+     * @param  Node\Variable $var
+     * @param  mixed         $values
+     *
+     * @return string encoded string
+     */
     public function encode(Parser $parser, Node\Variable $var, $values)
     {
         $values    = (array)$values;
         $list      = isset($values[0]);
         $reserved  = $this->reserved;
+        $maps      = Parser::$reserved;
         $sep       = $this->sep;
         $assoc_sep = '=';
 
@@ -198,7 +208,7 @@ abstract class Abstraction
             $assoc_sep = $sep = ',';
         }
 
-        return implode($sep, array_map(function($v, $k) use ($assoc_sep, $reserved, $list) {
+        array_walk($values, function(&$v, $k) use ($assoc_sep, $reserved, $list, $maps) {
 
             $encoded = rawurlencode($v);
 
@@ -209,28 +219,84 @@ abstract class Abstraction
 
             # rawurlencode is compliant with 'unreserved' set
             if (!$reserved) {
-                return $encoded;
+                $v = $encoded;
             }
 
             # decode chars in reserved set
             else {
-                $maps = Parser::$reserved;
 
-                return str_replace(
+                $v = str_replace(
                     array_keys($maps),
                     $maps,
                     $encoded
                 );
             }
+        });
 
-        }, $values, array_keys($values)));
+        return implode($sep, $values);
     }
 
+    /**
+     * Decodes variable
+     *
+     * @param  Parser        $parser
+     * @param  Node\Variable $var
+     * @param  mixed         $values
+     *
+     * @return string decoded string
+     */
     public function decode(Parser $parser, Node\Variable $var, $values)
     {
+        $single = !is_array($values);
+        $values = (array)$values;
 
+        array_walk($values, function(&$v, $k) {
+            $v = urldecode($v);
+        });
+
+        return $single ? reset($values) : $values;
     }
     
+    /**
+     * Extracts value from variable
+     *
+     * @param  Parser        $parser
+     * @param  Node\Variable $var
+     * @param  string        $data
+     */
+    public function extract(Parser $parser, Node\Variable $var, $data)
+    {
+        $value   = $data;
+        $vals    = array_filter(explode($this->sep, $data));
+        $options = $var->options;
+
+        switch ($options['modifier']) {
+
+            case '*':
+                $data = array();
+                foreach($vals as $val) {
+
+                    if (strpos($val, '=') !== false) {
+                        list($k, $v) = explode('=', $val);
+                        $data[$k] = $v;
+                    }
+
+                    else {
+                        $data[]   = $val;
+                    }
+                }
+
+                break;
+            case ':':
+                break;
+            default:
+                $data = strpos($data, $this->sep) !== false ? $vals : $value;
+
+        }
+
+        return $this->decode($parser, $var, $data);
+    }
+
     public static function createById($id)
     {
         if (!isset(static::$types[$id])) {
