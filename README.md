@@ -75,6 +75,45 @@ $params = $uri->extract('/search/{term:1}/{term}/{?q*,limit}', '/search/j/john/?
 
 Note that in the example above, result returned by `extract` method has an extra keys named `term:1` for `prefix` modifier. This key was added just for our convenience to access prefix data.
 
+#### Array modifier `%`
+
+By default, RFC 6570 only has 2 types of operators `:` and `*`. This `%` array operator was added to the library because current spec can't handle array style query e.g. `list[]=a` or `key[user]=john`.
+
+Example usage for `%` modifier
+
+```php
+<?php
+
+$uri->expand('{?list%,keys%}', [
+    'list' => [
+        'a', 'b',
+    ),
+    'keys' => [
+        'a' => 1,
+        'b' => 2,
+    ),
+]);
+
+>> '?list[]=a&list[]=b&keys[a]=1&keys[b]=2'
+
+$params = $uri->extract('{?list%,keys%}', '?list[]=a&list[]=b&keys[a]=1&keys[b]=2', )
+
+>> print_r($params);
+(
+    [list] => Array
+        (
+            [0] => a
+            [1] => b
+        )
+
+    [keys] => Array
+        (
+            [a] => 1
+            [b] => 2
+        )
+)
+```
+
 ## Installation
 
 Using `composer`
@@ -86,3 +125,7 @@ Using `composer`
     }
 }
 ```
+
+### Changelogs
+
+* **0.2.0** Add a new modifier `%` which allows user to use `list[]=a&list[]=b` query pattern.

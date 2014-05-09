@@ -6,10 +6,11 @@ use Rize\UriTemplate\Node;
 use Rize\UriTemplate\Parser;
 
 /**
- * | 1   |    {?list}    ?list=red,green,blue             | {name}=(?:\w+(?:,\w+?)*)*
- * | 2   |    {?list*}   ?list=red&list=green&list=blue   | {name}+=(?:{$value}+(?:{sep}{name}+={$value}*))*
- * | 3   |    {?keys}    ?keys=semi,%3B,dot,.,comma,%2C   | (same as 1)
- * | 4   |    {?keys*}   ?semi=%3B&dot=.&comma=%2C        | (same as 2)
+ * | 1   |    {?list}    ?list=red,green,blue                 | {name}=(?:\w+(?:,\w+?)*)*
+ * | 2   |    {?list*}   ?list=red&list=green&list=blue       | {name}+=(?:{$value}+(?:{sep}{name}+={$value}*))*
+ * | 3   |    {?keys}    ?keys=semi,%3B,dot,.,comma,%2C       | (same as 1)
+ * | 4   |    {?keys*}   ?semi=%3B&dot=.&comma=%2C            | (same as 2)
+ * | 5   |    {?list*}   ?list[]=red&list[]=green&list[]=blue | {name[]}+=(?:{$value}+(?:{sep}{name[]}+={$value}*))*
  */
 class Named extends Abstraction
 {
@@ -29,6 +30,12 @@ class Named extends Abstraction
                     break;
                 case ':':
                     $regex = "{$value}\{0,{$options['value']}\}";
+                    break;
+
+                case '%':
+                    # 5
+                    $name  = $name.'+\[[^\]]*\]';
+                    $regex = "{$name}=(?:{$value}+(?:{$this->sep}{$name}={$value}*)*)";
                     break;
                 default:
                     throw new \Exception("Unknown modifier `{$options['modifier']}`");
@@ -98,22 +105,38 @@ class Named extends Abstraction
             return $result . $this->empty;
         }
 
-        $list = isset($val[0]);
-        $tmp  = array();
+        $list  = isset($val[0]);
+        $data  = array();
+
+        # array modifier
+        $array = $var->options['modifier'] === '%';
 
         foreach($val as $k => $v) {
 
-            # if value it's a list use `varname` as keyname, otherwise use `key` name
-            $name  = $this->encode($parser, $var, $list ? $var->name : $k);
-            $v     = $this->encode($parser, $var, $v);
-            $tmp[] = "{$name}={$v}";
+            # if it's array modifier, use `name[]=value` pattern.
+            # array modifier always uses variable name as param name
+            # e.g. {?list} will use `list[]=1` or list[key]=1`
+            # regardless its values (either list, keys)
+            if ($array) {
+                $name  = $this->encode($parser, $var, $var->name);
+                $name .= '[' . ($list ? '' : $k) . ']';
+            }
+
+            else {
+
+                # if value is a list, use `varname` as keyname, otherwise use `key` name
+                $name = $this->encode($parser, $var, $list ? $var->name : $k);
+            }
+
+            $v      = $this->encode($parser, $var, $v);
+            $data[] = "{$name}={$v}";
         }
 
-        if (!$tmp) {
+        if (!$data) {
             return;
         }
 
-        return implode($this->sep, $tmp);
+        return implode($this->sep, $data);
     }
 
     public function extract(Parser $parser, Node\Variable $var, $data)
@@ -123,14 +146,32 @@ class Named extends Abstraction
         $options = $var->options;
 
         switch ($options['modifier']) {
+            case '%':
             case '*':
                 $data = array();
+                $test = array();
+
                 foreach($vals as $val) {
                     list($k, $v) = explode('=', $val);
 
                     # 2
                     if ($k === $var->token) {
                         $data[]   = $v;
+                    }
+
+                    # 5
+                    else if (($pos = strpos($k, '[')) !== false) {
+
+                        # extract key from `[]` sqaure bracket
+                        $key = substr($k, $pos + 1, -1);
+
+                        if (!$key) {
+                            $data[] = $v;
+                        }
+
+                        else {
+                            $data[$key] = $v;
+                        }
                     }
 
                     # 4

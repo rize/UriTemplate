@@ -127,8 +127,7 @@ abstract class Abstraction
     {
         $options    = $var->options;
         $name       = $var->name;
-        $is_prefix  = $options['modifier'] === ':';
-        $is_explode = $options['modifier'] === '*';
+        $is_explode = in_array($options['modifier'], array('*', '%'));
 
         # skip null
         if (!isset($params[$name])) {
@@ -143,12 +142,12 @@ abstract class Abstraction
             return $this->expandString($parser, $var, $val);
         }
 
-        # non-explode
+        # non-explode ':'
         else if (!$is_explode) {
             return $this->expandNonExplode($parser, $var, $val);
         }
 
-        # explode
+        # explode '*', '%'
         else {
             return $this->expandExplode($parser, $var, $val);
         }
@@ -167,6 +166,9 @@ abstract class Abstraction
         return $result.$this->encode($parser, $var, $val);
     }
 
+    /**
+     * Non explode modifier ':'
+     */
     public function expandNonExplode(Parser $parser, Node\Variable $var, array $val)
     {
         if (empty($val)) {
@@ -176,6 +178,9 @@ abstract class Abstraction
         return $this->encode($parser, $var, $val);
     }
 
+    /**
+     * Explode modifier '*', '%'
+     */
     public function expandExplode(Parser $parser, Node\Variable $var, array $val)
     {
         if (empty($val)) {

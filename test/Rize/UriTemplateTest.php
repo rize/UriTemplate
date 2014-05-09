@@ -249,6 +249,55 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    public function dataExpandWithArrayModifier()
+    {
+        return array(
+
+            # List
+            array(
+                '?choices[]=a&choices[]=b&choices[]=c',
+                array(
+                    'uri'   => '{?choices%}',
+                    'params' => array(
+                        'choices' => array('a', 'b', 'c'),
+                    ),
+                ),
+            ),
+
+            # Keys
+            array(
+                '?choices[a]=1&choices[b]=2&choices[c]=3',
+                array(
+                    'uri'   => '{?choices%}',
+                    'params' => array(
+                        'choices' => array(
+                            'a' => 1,
+                            'b' => 2,
+                            'c' => 3,
+                        ),
+                    ),
+                ),
+            ),
+
+            # Mixed
+            array(
+                '?list[]=a&list[]=b&keys[a]=1&keys[b]=2',
+                array(
+                    'uri'   => '{?list%,keys%}',
+                    'params' => array(
+                        'list' => array(
+                            'a', 'b',
+                        ),
+                        'keys' => array(
+                            'a' => 1,
+                            'b' => 2,
+                        ),
+                    ),
+                ),
+            ),
+        );
+    }
+
     public function dataBaseTemplate()
     {
         return array(
@@ -299,6 +348,21 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
     public function dataExtraction()
     {
         return array(
+           array(
+                '/no/{term:1}/random/foo{?query,list%,keys%}',
+                '/no/j/random/foo?query=1,2,3&list[]=a&list[]=b&keys[a]=1&keys[b]=2',
+                array(
+                    'term:1' => 'j',
+                    'query'  => array(1, 2, 3),
+                    'list'   => array(
+                        'a', 'b',
+                    ),
+                    'keys'   => array(
+                        'a' => 1,
+                        'b' => 2,
+                    ),
+                ),
+            ),
             array(
                 '/no/{term:1}/random/{term}/{test*}/foo{?query,number}',
                 '/no/j/random/john/a,b,c/foo?query=1,2,3&number=10',
@@ -359,12 +423,15 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $result);
     }
 
-    public function _testParseExpression()
+    /**
+     * @dataProvider dataExpandWithArrayModifier
+     */
+    public function testExpandWithArrayModifier($expected, $input)
     {
         $service = $this->service();
-        $result  = $service->parseExpression('+test,b', array('test' => 'ab/c'));
+        $result  = $service->expand($input['uri'], $input['params']);
 
-        $this->assertEquals('ab/c', $result);
+        $this->assertEquals($expected, $result);
     }
 
     /**

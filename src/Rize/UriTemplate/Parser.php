@@ -105,7 +105,7 @@ class Parser
         $val      = null;
         $modifier = null;
 
-        # check for prefix (:) / explode (*) modifier
+        # check for prefix (:) / explode (*) / array (%) modifier
         if (strpos($var, ':') !== false) {
             $modifier = ':';
             list($varname, $val) = explode(':', $var);
@@ -116,15 +116,18 @@ class Parser
             }
         }
 
-        if (substr($var, -1) === '*') {
+        switch($last = substr($var, -1)) {
+            case '*':
+            case '%':
 
-            # there can be only 1 modifier per var
-            if ($modifier) {
-                throw new \Exception("Multiple modifiers per variable are not allowed [$var]");
-            }
+                # there can be only 1 modifier per var
+                if ($modifier) {
+                    throw new \Exception("Multiple modifiers per variable are not allowed [$var]");
+                }
 
-            $modifier = '*';
-            $var      = substr($var, 0, -1);
+                $modifier = $last;
+                $var      = substr($var, 0, -1);
+                break;
         }
 
         return $this->createVariableNode(

@@ -28,6 +28,8 @@ class UnNamed extends Abstraction
                 case ':':
                     $regex = $value.'{0,'.$options['value'].'}';
                     break;
+                case '%':
+                    throw new \Exception("% (array) modifier only works with Named type operators e.g. ;,?,&");
                 default:
                     throw new \Exception("Unknown modifier `{$options['modifier']}`");
             }
