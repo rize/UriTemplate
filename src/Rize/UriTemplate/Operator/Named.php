@@ -34,8 +34,8 @@ class Named extends Abstraction
 
                 case '%':
                     # 5
-                    $name  = $name.'+\[[^\]]*\]';
-                    $regex = "{$name}=(?:{$value}+(?:{$this->sep}{$name}={$value}*)*)";
+                    $name  = $name.'+(?:%5B|\[)[^=]*=';
+                    $regex = "{$name}(?:{$value}+(?:{$this->sep}{$name}{$value}*)*)";
                     break;
                 default:
                     throw new \Exception("Unknown modifier `{$options['modifier']}`");
@@ -107,36 +107,27 @@ class Named extends Abstraction
 
         $list  = isset($val[0]);
         $data  = array();
-
-        # array modifier
-        $array = $var->options['modifier'] === '%';
-
         foreach($val as $k => $v) {
 
-            # if it's array modifier, use `name[]=value` pattern.
-            # array modifier always uses variable name as param name
-            # e.g. {?list} will use `list[]=1` or list[key]=1`
-            # regardless its values (either list, keys)
-            if ($array) {
-                $name  = $this->encode($parser, $var, $var->name);
-                $name .= '[' . ($list ? '' : $k) . ']';
+            # if value is a list, use `varname` as keyname, otherwise use `key` name
+            $key = $list ? $var->name : $k;
+            if ($list) {
+                $data[$key][] = $v;
             }
 
             else {
-
-                # if value is a list, use `varname` as keyname, otherwise use `key` name
-                $name = $this->encode($parser, $var, $list ? $var->name : $k);
+                $data[$key] = $v;
             }
-
-            $v      = $this->encode($parser, $var, $v);
-            $data[] = "{$name}={$v}";
         }
 
-        if (!$data) {
-            return;
+        # if it's array modifier, we have to use variable name as index
+        # e.g. if variable name is 'query' and value is ['limit' => 1] 
+        # then we convert it to ['query' => ['limit' => 1]]
+        if (!$list and $var->options['modifier'] === '%') {
+            $data = array($var->name => $data);
         }
 
-        return implode($this->sep, $data);
+        return $this->encodeExplodeVars($parser, $var, $data);
     }
 
     public function extract(Parser $parser, Node\Variable $var, $data)
@@ -147,6 +138,10 @@ class Named extends Abstraction
 
         switch ($options['modifier']) {
             case '%':
+                parse_str($data, $query);
+
+                return $query[$var->name];
+
             case '*':
                 $data = array();
                 $test = array();
@@ -157,21 +152,6 @@ class Named extends Abstraction
                     # 2
                     if ($k === $var->token) {
                         $data[]   = $v;
-                    }
-
-                    # 5
-                    else if (($pos = strpos($k, '[')) !== false) {
-
-                        # extract key from `[]` sqaure bracket
-                        $key = substr($k, $pos + 1, -1);
-
-                        if (!$key) {
-                            $data[] = $v;
-                        }
-
-                        else {
-                            $data[$key] = $v;
-                        }
                     }
 
                     # 4
@@ -195,5 +175,41 @@ class Named extends Abstraction
         }
 
         return $this->decode($parser, $var, $data);
+    }
+
+    public function encodeExplodeVars(Parser $parser, Node\Variable $var, $data)
+    {
+        # http_build_query uses PHP_QUERY_RFC1738 encoding by default 
+        # i.e. spaces are encoded as '+' (plus signs) we need to convert
+        # it to %20 RFC3986
+        $query = http_build_query($data, null, $this->sep);
+        $query = str_replace('+', '%20', $query);
+
+        # `%` array modifier
+        if ($var->options['modifier'] === '%') {
+
+            # it also uses numeric based-index by default e.g. list[] becomes list[0]
+            $query = preg_replace('#%5B\d+%5D#', '%5B%5D', $query);
+        }
+
+        # `:`, `*` modifiers
+        else {
+
+            # by default, http_build_query will convert array values to `a[]=1&a[]=2`
+            # which is different from the spec. It should be `a=1&a=2`
+            $query = preg_replace('#%5B\d+%5D#', '', $query);
+        }
+
+        # handle reserved charset
+        if ($this->reserved) {
+
+            $query = str_replace(
+                array_keys(static::$reserved_chars),
+                static::$reserved_chars,
+                $query
+            );
+        }
+
+        return $query;
     }
 }

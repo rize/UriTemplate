@@ -9,30 +9,6 @@ class Parser
 {
     const REGEX_VARNAME = '(?:[A-z0-9_\.]|%[0-9a-fA-F]{2})';
 
-        /**
-         * gen-delims | sub-delims
-         */
-    public static $reserved = array(
-            '%3A' => ':',
-            '%2F' => '/',
-            '%3F' => '?',
-            '%23' => '#',
-            '%5B' => '[',
-            '%5D' => ']',
-            '%40' => '@',
-            '%21' => '!',
-            '%24' => '$',
-            '%26' => '&',
-            '%27' => "'",
-            '%28' => '(',
-            '%29' => ')',
-            '%2A' => '*',
-            '%2B' => '+',
-            '%2C' => ',',
-            '%3B' => ';',
-            '%3D' => '=',
-        );
-
     /**
      * Parses URI Template and returns nodes
      */

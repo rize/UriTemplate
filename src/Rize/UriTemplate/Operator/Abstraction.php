@@ -26,6 +26,20 @@ use Rize\UriTemplate\Parser;
  * | 2   |    {?list*}   ?list=red&list=green&list=blue   | {name}+=(?:{$value}+(?:{sep}{name}+={$value}*))*
  * | 3   |    {?keys}    ?keys=semi,%3B,dot,.,comma,%2C   | (same as 1)
  * | 4   |    {?keys*}   ?semi=%3B&dot=.&comma=%2C        | (same as 2)
+ *
+ * UNRESERVED
+ * ----------
+ * RFC 1738 ALPHA | DIGIT | "-" | "." | "_" |     | "$" | "+" | "!" | "*" | "'" | "(" | ")" | ","
+ * RFC 3986 ALPHA | DIGIT | "-" | "." | "_" | "~"
+ * RFC 6570 ALPHA | DIGIT | "-" | "." | "_" | "~"
+ *
+ * RESERVED
+ * --------
+ * RFC 1738 ":" | "/" | "?" |                 | "@" | "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "=" | "-" | "_" | "." | 
+ * RFC 3986 ":" | "/" | "?" | "#" | "[" | "]" | "@" | "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "="
+ * RFC 6570 ":" | "/" | "?" | "#" | "[" | "]" | "@" | "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "="
+ *
+ * PHP_QUERY_RFC3986 was added in PHP 5.4.0
  */
 abstract class Abstraction
 {
@@ -111,6 +125,30 @@ abstract class Abstraction
                   ),
               ),
               $loaded = array();
+
+        /**
+         * gen-delims | sub-delims
+         */
+    public static $reserved_chars = array(
+            '%3A' => ':',
+            '%2F' => '/',
+            '%3F' => '?',
+            '%23' => '#',
+            '%5B' => '[',
+            '%5D' => ']',
+            '%40' => '@',
+            '%21' => '!',
+            '%24' => '$',
+            '%26' => '&',
+            '%27' => "'",
+            '%28' => '(',
+            '%29' => ')',
+            '%2A' => '*',
+            '%2B' => '+',
+            '%2C' => ',',
+            '%3B' => ';',
+            '%3D' => '=',
+        );
 
     public function __construct($id, $named, $sep, $empty, $reserved, $start, $first)
     {
@@ -204,7 +242,6 @@ abstract class Abstraction
         $values    = (array)$values;
         $list      = isset($values[0]);
         $reserved  = $this->reserved;
-        $maps      = Parser::$reserved;
         $sep       = $this->sep;
         $assoc_sep = '=';
 
@@ -231,8 +268,8 @@ abstract class Abstraction
             else {
 
                 $v = str_replace(
-                    array_keys($maps),
-                    $maps,
+                    array_keys(static::$reserved_chars),
+                    static::$reserved_chars,
                     $encoded
                 );
             }

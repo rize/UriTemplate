@@ -37,6 +37,21 @@ $uri->expand('/search/{term:1}/{term}/{?q*,limit}', [
 >> '/search/j/john/?q=a&q=b&limit=10'
 ```
 
+#### `/` Path segment expansion
+
+```php
+<?php
+
+$uri->expand('http://{host}{/segments*}/{file}{.extensions*}', [
+    'host'       => 'www.host.com',
+    'segments'   => ['path', 'to', 'a'],
+    'file'       => 'file',
+    'extensions' => ['x', 'y'],
+]);
+
+>> 'http://www.host.com/path/to/a/file.x.y'
+```
+
 `Rize\UriTemplate` accepts `base-uri` as a 1st argument and `default params` as a 2nd argument. This is very useful when you're working with API endpoint.
 
 Take a look at real world example.
@@ -94,9 +109,11 @@ $uri->expand('{?list%,keys%}', [
     ),
 ]);
 
->> '?list[]=a&list[]=b&keys[a]=1&keys[b]=2'
+# '?list[]=a&list[]=b&keys[a]=1&keys[b]=2'
+>> '?list%5B%5D=a&list%5B%5D=b&keys%5Ba%5D=1&keys%5Bb%5D=2'
 
-$params = $uri->extract('{?list%,keys%}', '?list[]=a&list[]=b&keys[a]=1&keys[b]=2', )
+# [] get encoded to %5B%5D i.e. '?list[]=a&list[]=b&keys[a]=1&keys[b]=2'
+$params = $uri->extract('{?list%,keys%}', '?list%5B%5D=a&list%5B%5D=b&keys%5Ba%5D=1&keys%5Bb%5D=2', )
 
 >> print_r($params);
 (
@@ -121,7 +138,7 @@ Using `composer`
 ```
 {
     "require": {
-        "rize/uri-template": "~0.1.2"
+        "rize/uri-template": "~0.2.1"
     }
 }
 ```
@@ -129,3 +146,4 @@ Using `composer`
 ### Changelogs
 
 * **0.2.0** Add a new modifier `%` which allows user to use `list[]=a&list[]=b` query pattern.
+* **0.2.1** Add nested array support for `%` modifier

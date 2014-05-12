@@ -252,10 +252,10 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
     public function dataExpandWithArrayModifier()
     {
         return array(
-
             # List
             array(
-                '?choices[]=a&choices[]=b&choices[]=c',
+                # '?choices[]=a&choices[]=b&choices[]=c',
+                '?choices%5B%5D=a&choices%5B%5D=b&choices%5B%5D=c',
                 array(
                     'uri'   => '{?choices%}',
                     'params' => array(
@@ -266,14 +266,17 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
 
             # Keys
             array(
-                '?choices[a]=1&choices[b]=2&choices[c]=3',
+                # '?choices[a]=1&choices[b]=2&choices[c][test]=3',
+                '?choices%5Ba%5D=1&choices%5Bb%5D=2&choices%5Bc%5D%5Btest%5D=3',
                 array(
                     'uri'   => '{?choices%}',
                     'params' => array(
                         'choices' => array(
                             'a' => 1,
                             'b' => 2,
-                            'c' => 3,
+                            'c' => array(
+                                'test' => 3,
+                            ),
                         ),
                     ),
                 ),
@@ -281,7 +284,8 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
 
             # Mixed
             array(
-                '?list[]=a&list[]=b&keys[a]=1&keys[b]=2',
+                # '?list[]=a&list[]=b&keys[a]=1&keys[b]=2',
+                '?list%5B%5D=a&list%5B%5D=b&keys%5Ba%5D=1&keys%5Bb%5D=2',
                 array(
                     'uri'   => '{?list%,keys%}',
                     'params' => array(
@@ -350,7 +354,7 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
         return array(
            array(
                 '/no/{term:1}/random/foo{?query,list%,keys%}',
-                '/no/j/random/foo?query=1,2,3&list[]=a&list[]=b&keys[a]=1&keys[b]=2',
+                '/no/j/random/foo?query=1,2,3&list%5B%5D=a&list%5B%5D=b&keys%5Ba%5D=1&keys%5Bb%5D=2&keys%5Bc%5D%5Btest%5D%5Btest%5D=1',
                 array(
                     'term:1' => 'j',
                     'query'  => array(1, 2, 3),
@@ -360,6 +364,11 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
                     'keys'   => array(
                         'a' => 1,
                         'b' => 2,
+                        'c' => array(
+                            'test' => array(
+                                'test' => 1,
+                            ),
+                        ),
                     ),
                 ),
             ),
