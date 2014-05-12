@@ -250,7 +250,7 @@ abstract class Abstraction
             $assoc_sep = $sep = ',';
         }
 
-        array_walk($values, function(&$v, $k) use ($assoc_sep, $reserved, $list, $maps) {
+        array_walk($values, function(&$v, $k) use ($assoc_sep, $reserved, $list) {
 
             $encoded = rawurlencode($v);
 
