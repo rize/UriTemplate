@@ -242,6 +242,7 @@ abstract class Abstraction
         $values    = (array)$values;
         $list      = isset($values[0]);
         $reserved  = $this->reserved;
+        $maps      = static::$reserved_chars;
         $sep       = $this->sep;
         $assoc_sep = '=';
 
@@ -250,7 +251,7 @@ abstract class Abstraction
             $assoc_sep = $sep = ',';
         }
 
-        array_walk($values, function(&$v, $k) use ($assoc_sep, $reserved, $list) {
+        array_walk($values, function(&$v, $k) use ($assoc_sep, $reserved, $list, $maps) {
 
             $encoded = rawurlencode($v);
 
@@ -268,8 +269,8 @@ abstract class Abstraction
             else {
 
                 $v = str_replace(
-                    array_keys(static::$reserved_chars),
-                    static::$reserved_chars,
+                    array_keys($maps),
+                    $maps,
                     $encoded
                 );
             }
