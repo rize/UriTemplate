@@ -63,8 +63,6 @@ class UriTemplate
         $params = array();
         $nodes  = $this->parser->parse($template);
 
-        $regex = array();
-
         foreach($nodes as $node) {
 
             # uri'll be truncated from the start when a match is found
