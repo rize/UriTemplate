@@ -33,12 +33,17 @@ abstract class Abstraction
      * @param string $uri
      * @param array  $params
      */
-    public function match(Parser $parser, $uri, $params = array())
+    public function match(Parser $parser, $uri, $params = array(), $strict = false)
     {
         # match literal string from start to end
         $length = strlen($this->token);
-        if (($tmp = substr($uri, 0, $length)) === $this->token) {
+        if (substr($uri, 0, $length) === $this->token) {
             $uri = substr($uri, $length);
+        }
+
+        # when there's no match, just return null if strict mode is given
+        else if ($strict) {
+            return;
         }
 
         return array($uri, $params);

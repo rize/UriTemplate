@@ -47,7 +47,7 @@ class Expression extends Abstraction
      * @param string $uri
      * @param array  $params
      */
-    public function match(Parser $parser, $uri, $params = array())
+    public function match(Parser $parser, $uri, $params = array(), $strict = false)
     {
         $op = $this->operator;
 
@@ -65,12 +65,16 @@ class Expression extends Abstraction
             $regex = '#'.$op->toRegex($parser, $var).'#';
             $val   = null;
 
-            if (preg_match($regex, $uri, $match)) {
+            preg_match($regex, $uri, $match);
 
-                # remove matched part from input
-                $uri = preg_replace($regex, '', $uri, $limit = 1);
-                $val = $op->extract($parser, $var, $match[0]);
+            # if strict is given, we quit immediately when there's no match
+            if ($strict and empty($match[0])) {
+                return;
             }
+
+            # remove matched part from input
+            $uri = preg_replace($regex, '', $uri, $limit = 1);
+            $val = $op->extract($parser, $var, $match[0]);
 
             $params[$var->token] = $val;
         }

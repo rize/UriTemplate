@@ -56,9 +56,10 @@ class UriTemplate
      * Extracts variables from URI
      *
      * @param  string $uri
+     * @param  bool   $strict  This will perform a full match
      * @return array  params
      */
-    public function extract($template, $uri = null)
+    public function extract($template, $uri, $strict = false)
     {
         $params = array();
         $nodes  = $this->parser->parse($template);
@@ -66,10 +67,22 @@ class UriTemplate
         foreach($nodes as $node) {
 
             # uri'll be truncated from the start when a match is found
-            list($uri, $params) = $node->match($this->parser, $uri, $params);
+            $match = $node->match($this->parser, $uri, $params, $strict);
+
+            # if strict is given, just return null when there's no match
+            if ($strict and !$match) {
+                return;
+            }
+
+            list($uri, $params) = $match;
         }
 
         return $params;
+    }
+
+    public function getParser()
+    {
+        return $this->parser;
     }
 
     protected function createNodeParser()

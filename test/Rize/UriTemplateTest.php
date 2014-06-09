@@ -495,4 +495,55 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
             }
         }
     }
+
+    public function dataExtractStrictMode()
+    {
+        return array(
+
+            # match
+            array(
+                '/search/{term:1}/{term}/{?q*,limit}',
+                '/search/j/john/?a=1&b=2&limit=10',
+                true,
+            ),
+            array(
+                'http://example.com/{term:1}/{term}/search{?q*,lang}',
+                'http://example.com/j/john/search?q=Hello%20World%21&q=3&lang=th,jp,en',
+                true,
+            ),
+
+            # doesn't match
+            array(
+                '/search/{term:1}/{term}/{?q*,limit}',
+                '/search/j/?a=1&b=2&limit=10',
+                false,
+            ),
+            array(
+                'http://www.example.com/foo{?query,number}',
+                'http://www.example.com/foo?query=5',
+                false,
+            ),
+            array(
+                'http://www.example.com/foo{?query,number}',
+                'http://www.example.com/foo',
+                false,
+            ),
+            array(
+                'http://example.com/{term:1}/{term}/search{?q*,lang}',
+                'http://example.com/j/john/search?q=',
+                false,
+            ),
+        );
+    }
+
+    /**
+     * @dataProvider dataExtractStrictMode
+     */
+    public function testExtractStrictMode($template, $uri, $expected)
+    {
+        $service = $this->service();
+        $actual  = $service->extract($template, $uri, true);
+
+        $this->assertEquals($expected, (bool)$actual);
+    }
 }

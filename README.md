@@ -90,6 +90,47 @@ $params = $uri->extract('/search/{term:1}/{term}/{?q*,limit}', '/search/j/john/?
 
 Note that in the example above, result returned by `extract` method has an extra keys named `term:1` for `prefix` modifier. This key was added just for our convenience to access prefix data.
 
+#### `strict` mode
+
+```php
+<?php
+$uri->extract($template, $uri, $strict = false)
+```
+
+Normally `extract` method will try to extract vars from a uri even if it's partially matched. For example
+
+```php
+<?php
+$params = $uri->extract('/{?a,b}', '/?a=1')
+
+>> print_r($params);
+(
+    [a] => 1
+    [b] => null
+)
+```
+
+With `strict mode`, it will allow you to extract uri only when variables in template are fully matched with given uri.
+
+Which is useful when you want to determine whether the given uri is matched against your template or not (in case you want to use it as routing service).
+
+```php
+<?php
+# Note that variable `b` is absent in uri
+$params = $uri->extract('/{?a,b}', '/?a=1', true);
+
+>>> null
+
+# Now we give `b` some value
+$params = $uri->extract('/{?a,b}', '/?a=1&b=2', true);
+
+>>> print_r($params)
+(
+  [a] => 1
+  [b] => 2
+)
+```
+
 #### Array modifier `%`
 
 By default, RFC 6570 only has 2 types of operators `:` and `*`. This `%` array operator was added to the library because current spec can't handle array style query e.g. `list[]=a` or `key[user]=john`.
@@ -138,7 +179,7 @@ Using `composer`
 ```
 {
     "require": {
-        "rize/uri-template": "~0.2.1"
+        "rize/uri-template": "~0.2.2"
     }
 }
 ```
@@ -147,3 +188,4 @@ Using `composer`
 
 * **0.2.0** Add a new modifier `%` which allows user to use `list[]=a&list[]=b` query pattern.
 * **0.2.1** Add nested array support for `%` modifier
+* **0.2.4** Add strict mode support for `extract` method
