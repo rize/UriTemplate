@@ -179,7 +179,7 @@ Using `composer`
 ```
 {
     "require": {
-        "rize/uri-template": "~0.2.2"
+        "rize/uri-template": "~0.2.5"
     }
 }
 ```
@@ -188,4 +188,4 @@ Using `composer`
 
 * **0.2.0** Add a new modifier `%` which allows user to use `list[]=a&list[]=b` query pattern.
 * **0.2.1** Add nested array support for `%` modifier
-* **0.2.4** Add strict mode support for `extract` method
+* **0.2.5** Add strict mode support for `extract` method

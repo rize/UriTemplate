@@ -65,16 +65,19 @@ class Expression extends Abstraction
             $regex = '#'.$op->toRegex($parser, $var).'#';
             $val   = null;
 
-            preg_match($regex, $uri, $match);
+            $success = preg_match($regex, $uri, $match);
 
-            # if strict is given, we quit immediately when there's no match
-            if ($strict and empty($match[0])) {
-                return;
+            if (preg_match($regex, $uri, $match)) {
+
+              # remove matched part from input
+              $uri = preg_replace($regex, '', $uri, $limit = 1);
+              $val = $op->extract($parser, $var, $match[0]);
             }
 
-            # remove matched part from input
-            $uri = preg_replace($regex, '', $uri, $limit = 1);
-            $val = $op->extract($parser, $var, $match[0]);
+            # if strict is given, we quit immediately when there's no match
+            else if ($strict) {
+                return;
+            }
 
             $params[$var->token] = $val;
         }

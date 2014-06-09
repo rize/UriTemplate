@@ -1,5 +1,5 @@
 <?php
-
+error_reporting(-1);
 use Rize\UriTemplate;
 use Rize\UriTemplate\Node;
 
