@@ -66,15 +66,20 @@ class UriTemplate
 
         foreach($nodes as $node) {
 
-            # uri'll be truncated from the start when a match is found
-            $match = $node->match($this->parser, $uri, $params, $strict);
-
-            # if strict is given, just return null when there's no match
-            if ($strict and !$match) {
+            # if strict is given, and there's no remaining uri just return null
+            if ($strict and !$uri) {
                 return;
             }
 
+            # uri'll be truncated from the start when a match is found
+            $match = $node->match($this->parser, $uri, $params, $strict);
+
             list($uri, $params) = $match;
+        }
+
+        # if there's remaining $uri, matching is failed
+        if ($strict and (bool)$uri) {
+            return;
         }
 
         return $params;

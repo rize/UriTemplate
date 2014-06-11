@@ -47,7 +47,7 @@ class Named extends Abstraction
             $regex = "{$name}=(?:{$value}+(?:,{$value}+)*)*";
         }
 
-        return $regex;
+        return '(?:&)?'.$regex;
     }
 
     public function expandString(Parser $parser, Node\Variable $var, $val)
@@ -132,6 +132,11 @@ class Named extends Abstraction
 
     public function extract(Parser $parser, Node\Variable $var, $data)
     {
+        # get rid of optional `&` at the beginning
+        if ($data[0] === '&') {
+            $data = substr($data, 1);
+        }
+
         $value   = $data;
         $vals    = explode($this->sep, $data);
         $options = $var->options;

@@ -511,8 +511,23 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
                 'http://example.com/j/john/search?q=Hello%20World%21&q=3&lang=th,jp,en',
                 true,
             ),
+            array(
+                '/',
+                '/',
+                true
+            ),
 
             # doesn't match
+            array(
+                '/',
+                '/a',
+                false
+            ),
+            array(
+                '/{test}',
+                '/a/',
+                false
+            ),
             array(
                 '/search/{term:1}/{term}/{?q*,limit}',
                 '/search/j/?a=1&b=2&limit=10',
@@ -544,6 +559,6 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
         $service = $this->service();
         $actual  = $service->extract($template, $uri, true);
 
-        $this->assertEquals($expected, (bool)$actual);
+        $this->assertEquals($expected, isset($actual));
     }
 }
