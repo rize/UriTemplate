@@ -57,7 +57,7 @@ class UriTemplate
      *
      * @param  string $uri
      * @param  bool   $strict  This will perform a full match
-     * @return array  params
+     * @return null|array  params or null if not match and $strict is true
      */
     public function extract($template, $uri, $strict = false)
     {
