@@ -498,7 +498,7 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
 
     public function dataExtractStrictMode()
     {
-        return array(
+        $dataTest = array(
 
             # match
             array(
@@ -549,6 +549,47 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
                 false,
             ),
         );
+
+        $rfc3986AllowedPathCharacters = array(
+            '-', '.', '_', '~', '!', '$', '&', "'", '(', ')', '*', '+', ',', ';', '=', ':', '@',
+        );
+
+        foreach ($rfc3986AllowedPathCharacters as $char) {
+            $title = "RFC3986 path character ($char)";
+            $title = str_replace("'", 'single quote', $title); // PhpStorm workaround
+            $data = array(
+                '/search/{term}',
+                "/search/foo{$char}baz",
+                true,
+            );
+
+            $dataTest[$title] = $data;
+            $data = array(
+                '/search/{;term}',
+                "/search/;term=foo{$char}baz",
+                true,
+            );
+            $dataTest['Named ' . $title] = $data;
+        }
+
+        $rfc3986AllowedQueryCharacters = $rfc3986AllowedPathCharacters;
+        $rfc3986AllowedQueryCharacters[] = '/';
+        $rfc3986AllowedQueryCharacters[] = '?';
+        unset($rfc3986AllowedQueryCharacters[array_search('&', $rfc3986AllowedQueryCharacters, true)]);
+
+        foreach ($rfc3986AllowedQueryCharacters as $char) {
+            $title = "RFC3986 query character ($char)";
+            $title = str_replace("'", 'single quote', $title); // PhpStorm workaround
+
+            $data = array(
+                '/search/{?term}',
+                "/search/?term=foo{$char}baz",
+                true,
+            );
+            $dataTest['Named ' . $title] = $data;
+        }
+
+        return $dataTest;
     }
 
     /**
