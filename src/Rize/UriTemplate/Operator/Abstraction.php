@@ -308,7 +308,7 @@ abstract class Abstraction
         $values = (array)$values;
 
         array_walk($values, function(&$v, $k) {
-            $v = urldecode($v);
+            $v = rawurldecode($v);
         });
 
         return $single ? reset($values) : $values;

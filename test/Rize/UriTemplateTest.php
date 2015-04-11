@@ -500,53 +500,40 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
     {
         $dataTest = array(
 
-            # match
             array(
                 '/search/{term:1}/{term}/{?q*,limit}',
                 '/search/j/john/?a=1&b=2&limit=10',
-                true,
+                array(
+                    'term:1' => 'j',
+                    'term' => 'john',
+                    'limit' => '10',
+                    'q' => array(
+                        'a' => '1',
+                        'b' => '2',
+                    ),
+                ),
             ),
             array(
                 'http://example.com/{term:1}/{term}/search{?q*,lang}',
                 'http://example.com/j/john/search?q=Hello%20World%21&q=3&lang=th,jp,en',
-                true,
+                array(
+                    'term:1' => 'j',
+                    'term' => 'john',
+                    'lang' => array(
+                        'th',
+                        'jp',
+                        'en',
+                    ),
+                    'q' => array(
+                        'Hello World!',
+                        '3',
+                    ),
+                ),
             ),
             array(
                 '/',
                 '/',
-                true
-            ),
-
-            # doesn't match
-            array(
-                '/',
-                '/a',
-                false
-            ),
-            array(
-                '/{test}',
-                '/a/',
-                false
-            ),
-            array(
-                '/search/{term:1}/{term}/{?q*,limit}',
-                '/search/j/?a=1&b=2&limit=10',
-                false,
-            ),
-            array(
-                'http://www.example.com/foo{?query,number}',
-                'http://www.example.com/foo?query=5',
-                false,
-            ),
-            array(
-                'http://www.example.com/foo{?query,number}',
-                'http://www.example.com/foo',
-                false,
-            ),
-            array(
-                'http://example.com/{term:1}/{term}/search{?q*,lang}',
-                'http://example.com/j/john/search?q=',
-                false,
+                array(),
             ),
         );
 
@@ -557,17 +544,30 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
         foreach ($rfc3986AllowedPathCharacters as $char) {
             $title = "RFC3986 path character ($char)";
             $title = str_replace("'", 'single quote', $title); // PhpStorm workaround
+            if ($char === ',') { // , means array on RFC6570
+                $params = array(
+                    'term' => array(
+                        'foo',
+                        'baz',
+                    ),
+                );
+            } else {
+                $params = array(
+                    'term' => "foo{$char}baz",
+                );
+            }
+
             $data = array(
                 '/search/{term}',
                 "/search/foo{$char}baz",
-                true,
+                $params,
             );
 
             $dataTest[$title] = $data;
             $data = array(
                 '/search/{;term}',
                 "/search/;term=foo{$char}baz",
-                true,
+                $params,
             );
             $dataTest['Named ' . $title] = $data;
         }
@@ -580,11 +580,23 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
         foreach ($rfc3986AllowedQueryCharacters as $char) {
             $title = "RFC3986 query character ($char)";
             $title = str_replace("'", 'single quote', $title); // PhpStorm workaround
+            if ($char === ',') { // , means array on RFC6570
+                $params = array(
+                    'term' => array(
+                        'foo',
+                        'baz',
+                    ),
+                );
+            } else {
+                $params = array(
+                    'term' => "foo{$char}baz",
+                );
+            }
 
             $data = array(
                 '/search/{?term}',
                 "/search/?term=foo{$char}baz",
-                true,
+                $params,
             );
             $dataTest['Named ' . $title] = $data;
         }
@@ -592,14 +604,63 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
         return $dataTest;
     }
 
+    public function extractStrictModeNotMatchProvider()
+    {
+        return array(
+            array(
+                '/',
+                '/a',
+            ),
+            array(
+                '/{test}',
+                '/a/',
+            ),
+            array(
+                '/search/{term:1}/{term}/{?q*,limit}',
+                '/search/j/?a=1&b=2&limit=10',
+            ),
+            array(
+                'http://www.example.com/foo{?query,number}',
+                'http://www.example.com/foo?query=5',
+            ),
+            array(
+                'http://www.example.com/foo{?query,number}',
+                'http://www.example.com/foo',
+            ),
+            array(
+                'http://example.com/{term:1}/{term}/search{?q*,lang}',
+                'http://example.com/j/john/search?q=',
+            ),
+        );
+    }
+
     /**
      * @dataProvider dataExtractStrictMode
+     *
+     * @param string $template
+     * @param string $uri
+     * @param array $expectedParams
      */
-    public function testExtractStrictMode($template, $uri, $expected)
+    public function testExtractStrictMode($template, $uri, array $expectedParams)
     {
         $service = $this->service();
-        $actual  = $service->extract($template, $uri, true);
+        $params = $service->extract($template, $uri, true);
 
-        $this->assertEquals($expected, isset($actual));
+        $this->assertTrue(isset($params));
+        $this->assertEquals($expectedParams, $params);
+    }
+
+    /**
+     * @dataProvider extractStrictModeNotMatchProvider
+     *
+     * @param string $template
+     * @param string $uri
+     */
+    public function testExtractStrictModeNotMatch($template, $uri)
+    {
+        $service = $this->service();
+        $actual = $service->extract($template, $uri, true);
+
+        $this->assertFalse(isset($actual));
     }
 }
