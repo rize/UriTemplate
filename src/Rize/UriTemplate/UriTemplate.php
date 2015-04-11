@@ -1,9 +1,6 @@
 <?php
 
-namespace Rize;
-
-use Rize\UriTemplate\Node;
-use Rize\UriTemplate\Parser;
+namespace Rize\UriTemplate;
 
 /**
  * URI Template
@@ -11,14 +8,14 @@ use Rize\UriTemplate\Parser;
 class UriTemplate
 {
              /**
-              * @var Rize\UriTemplate\Parser
+              * @var Parser
               */
     protected $parser,
               $parsed = array(),
               $base_uri,
               $params = array();
 
-    public function __construct($base_uri = '', $params = array(), Node\Parser $parser = null)
+    public function __construct($base_uri = '', $params = array(), Parser $parser = null)
     {
         $this->base_uri = $base_uri;
         $this->params   = $params;

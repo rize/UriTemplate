@@ -15,7 +15,7 @@ A very simple usage (string expansion).
 ```php
 <?php
 
-use Rize\UriTemplate;
+use Rize\UriTemplate\UriTemplate;
 
 $uri = new UriTemplate;
 $uri->expand('/{username}/profile', ['username' => 'john']);

@@ -2,8 +2,6 @@
 
 namespace Rize\UriTemplate\Node;
 
-use Rize\UriTemplate\Parser;
-
 /**
  * Description
  */
