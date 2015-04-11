@@ -53,7 +53,7 @@ class Parser
 
             # not valid chars?
             if (!preg_match('#'.self::REGEX_VARNAME.'#', $token)) {
-                throw new \Exception("Invalid operator [$prefx] found at {$token}");
+                throw new \Exception("Invalid operator [$prefix] found at {$token}");
             }
 
             # default operator
