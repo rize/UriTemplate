@@ -161,6 +161,8 @@ abstract class Abstraction
         $this->reserved = $reserved;
     }
 
+    abstract public function toRegex(Parser $parser, Node\Variable $var);
+
     public function expand(Parser $parser, Node\Variable $var, array $params = array())
     {
         $options    = $var->options;

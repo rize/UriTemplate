@@ -13,7 +13,7 @@ class Parser
      * Parses URI Template and returns nodes
      *
      * @param string $template
-     * @return array
+     * @return Node\Abstraction[]
      */
     public function parse($template)
     {
@@ -27,6 +27,10 @@ class Parser
         return $nodes;
     }
 
+    /**
+     * @param string $token
+     * @return Node\Abstraction
+     */
     protected function createNode($token)
     {
         # literal string
