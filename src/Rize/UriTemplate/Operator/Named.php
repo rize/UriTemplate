@@ -149,7 +149,6 @@ class Named extends Abstraction
 
             case '*':
                 $data = array();
-                $test = array();
 
                 foreach($vals as $val) {
                     list($k, $v) = explode('=', $val);
