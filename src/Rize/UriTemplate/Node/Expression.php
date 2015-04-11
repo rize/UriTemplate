@@ -25,12 +25,12 @@ class Expression extends Abstraction
         $data = array();
         $op   = $this->operator;
 
-        # check for variable modifiers
+        // check for variable modifiers
         foreach($this->variables as $var) {
 
             $val = $op->expand($parser, $var, $params);
 
-            # skip null value
+            // skip null value
             if (!is_null($val)) {
                 $data[] = $val;
             }
@@ -52,12 +52,12 @@ class Expression extends Abstraction
     {
         $op = $this->operator;
 
-        # check expression operator first
+        // check expression operator first
         if ($op->id and $uri[0] !== $op->id) {
           return array($uri, $params);
         }
 
-        # remove operator from input
+        // remove operator from input
         if ($op->id) {
             $uri = substr($uri, 1);
         }
@@ -68,12 +68,12 @@ class Expression extends Abstraction
 
             if (preg_match($regex, $uri, $match)) {
 
-                # remove matched part from input
+                // remove matched part from input
                 $uri = preg_replace($regex, '', $uri, $limit = 1);
                 $val = $op->extract($parser, $var, $match[0]);
             }
 
-            # if strict is given, we quit immediately when there's no match
+            // if strict is given, we quit immediately when there's no match
             else if ($strict) {
                 return null;
             }

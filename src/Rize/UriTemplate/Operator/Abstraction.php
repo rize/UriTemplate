@@ -169,25 +169,25 @@ abstract class Abstraction
         $name       = $var->name;
         $is_explode = in_array($options['modifier'], array('*', '%'));
 
-        # skip null
+        // skip null
         if (!isset($params[$name])) {
             return null;
         }
 
         $val  = $params[$name];
 
-        # This algorithm is based on RFC6570 http://tools.ietf.org/html/rfc6570
-        # non-array, e.g. string
+        // This algorithm is based on RFC6570 http://tools.ietf.org/html/rfc6570
+        // non-array, e.g. string
         if (!is_array($val)) {
             return $this->expandString($parser, $var, $val);
         }
 
-        # non-explode ':'
+        // non-explode ':'
         else if (!$is_explode) {
             return $this->expandNonExplode($parser, $var, $val);
         }
 
-        # explode '*', '%'
+        // explode '*', '%'
         else {
             return $this->expandExplode($parser, $var, $val);
         }
@@ -258,7 +258,7 @@ abstract class Abstraction
         $sep       = $this->sep;
         $assoc_sep = '=';
 
-        # non-explode modifier always use ',' as a separator
+        // non-explode modifier always use ',' as a separator
         if ($var->options['modifier'] !== '*') {
             $assoc_sep = $sep = ',';
         }
@@ -267,17 +267,17 @@ abstract class Abstraction
 
             $encoded = rawurlencode($v);
 
-            # assoc? encode key too
+            // assoc? encode key too
             if (!$list) {
                 $encoded = rawurlencode($k).$assoc_sep.$encoded;
             }
 
-            # rawurlencode is compliant with 'unreserved' set
+            // rawurlencode is compliant with 'unreserved' set
             if (!$reserved) {
                 $v = $encoded;
             }
 
-            # decode chars in reserved set
+            // decode chars in reserved set
             else {
 
                 $v = str_replace(

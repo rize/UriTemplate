@@ -35,7 +35,7 @@ class UriTemplate
         $uri     = $this->base_uri.$uri;
         $result  = array();
 
-        # quick check
+        // quick check
         if (($start = strpos($uri, '{')) === false) {
             return $uri;
         }
@@ -65,18 +65,18 @@ class UriTemplate
 
         foreach($nodes as $node) {
 
-            # if strict is given, and there's no remaining uri just return null
+            // if strict is given, and there's no remaining uri just return null
             if ($strict and !$uri) {
                 return null;
             }
 
-            # uri'll be truncated from the start when a match is found
+            // uri'll be truncated from the start when a match is found
             $match = $node->match($this->parser, $uri, $params, $strict);
 
             list($uri, $params) = $match;
         }
 
-        # if there's remaining $uri, matching is failed
+        // if there's remaining $uri, matching is failed
         if ($strict and (bool)$uri) {
             return null;
         }

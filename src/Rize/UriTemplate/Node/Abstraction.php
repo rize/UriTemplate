@@ -37,13 +37,13 @@ abstract class Abstraction
      */
     public function match(Parser $parser, $uri, $params = array(), $strict = false)
     {
-        # match literal string from start to end
+        // match literal string from start to end
         $length = strlen($this->token);
         if (substr($uri, 0, $length) === $this->token) {
             $uri = substr($uri, $length);
         }
 
-        # when there's no match, just return null if strict mode is given
+        // when there's no match, just return null if strict mode is given
         else if ($strict) {
             return null;
         }
