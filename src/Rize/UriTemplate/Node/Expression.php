@@ -10,13 +10,12 @@ use Rize\UriTemplate\Operator;
  */
 class Expression extends Abstraction
 {
-    public $token,
-           $operator,
+    public $operator,
            $variables = array();
 
     public function __construct($token, Operator\Abstraction $operator, array $variables = null)
     {
-        $this->token     = $token;
+        parent::__construct($token);
         $this->operator  = $operator;
         $this->variables = $variables;
     }
