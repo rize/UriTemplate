@@ -28,8 +28,9 @@ class UriTemplate
     /**
      * Expands URI Template
      *
-     * @param string $uri_template  URI Template
+     * @param string $uri  URI Template
      * @param array  $params        URI Template's parameters
+     * @return string
      */
     public function expand($uri, $params = array())
     {
@@ -55,9 +56,10 @@ class UriTemplate
     /**
      * Extracts variables from URI
      *
+     * @param  string $template
      * @param  string $uri
      * @param  bool   $strict  This will perform a full match
-     * @return array  params
+     * @return null|array params or null if not match and $strict is true
      */
     public function extract($template, $uri, $strict = false)
     {
@@ -68,7 +70,7 @@ class UriTemplate
 
             # if strict is given, and there's no remaining uri just return null
             if ($strict and !$uri) {
-                return;
+                return null;
             }
 
             # uri'll be truncated from the start when a match is found
@@ -79,7 +81,7 @@ class UriTemplate
 
         # if there's remaining $uri, matching is failed
         if ($strict and (bool)$uri) {
-            return;
+            return null;
         }
 
         return $params;

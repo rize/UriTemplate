@@ -11,6 +11,9 @@ class Parser
 
     /**
      * Parses URI Template and returns nodes
+     *
+     * @param string $template
+     * @return array
      */
     public function parse($template)
     {

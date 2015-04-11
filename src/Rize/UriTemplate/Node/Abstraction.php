@@ -32,6 +32,8 @@ abstract class Abstraction
      * @param Parser $parser
      * @param string $uri
      * @param array  $params
+     * @param bool $strict
+     * @return null|array `uri and params` or `null` if not match and $strict is true
      */
     public function match(Parser $parser, $uri, $params = array(), $strict = false)
     {
@@ -43,7 +45,7 @@ abstract class Abstraction
 
         # when there's no match, just return null if strict mode is given
         else if ($strict) {
-            return;
+            return null;
         }
 
         return array($uri, $params);

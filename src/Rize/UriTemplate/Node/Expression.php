@@ -45,6 +45,8 @@ class Expression extends Abstraction
      * @param Parser $parser
      * @param string $uri
      * @param array  $params
+     * @param bool $strict
+     * @return null|array `uri and params` or `null` if not match and $strict is true
      */
     public function match(Parser $parser, $uri, $params = array(), $strict = false)
     {
@@ -73,7 +75,7 @@ class Expression extends Abstraction
 
             # if strict is given, we quit immediately when there's no match
             else if ($strict) {
-                return;
+                return null;
             }
 
             $params[$var->token] = $val;
@@ -86,7 +88,8 @@ class Expression extends Abstraction
      * Sort variables before extracting data from uri.
      * We have to sort vars by non-explode to explode.
      *
-     * @params array $vars
+     * @param array $vars
+     * @return array
      */
     protected function sortVariables(array $vars)
     {

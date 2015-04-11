@@ -169,7 +169,7 @@ abstract class Abstraction
 
         # skip null
         if (!isset($params[$name])) {
-            return;
+            return null;
         }
 
         $val  = $params[$name];
@@ -206,11 +206,16 @@ abstract class Abstraction
 
     /**
      * Non explode modifier ':'
+     *
+     * @param Parser $parser
+     * @param Node\Variable $var
+     * @param array $val
+     * @return null|string
      */
     public function expandNonExplode(Parser $parser, Node\Variable $var, array $val)
     {
         if (empty($val)) {
-            return;
+            return null;
         }
 
         return $this->encode($parser, $var, $val);
@@ -218,11 +223,16 @@ abstract class Abstraction
 
     /**
      * Explode modifier '*', '%'
+     *
+     * @param Parser $parser
+     * @param Node\Variable $var
+     * @param array $val
+     * @return null|string
      */
     public function expandExplode(Parser $parser, Node\Variable $var, array $val)
     {
         if (empty($val)) {
-            return;
+            return null;
         }
 
         return $this->encode($parser, $var, $val);
@@ -306,6 +316,7 @@ abstract class Abstraction
      * @param  Parser        $parser
      * @param  Node\Variable $var
      * @param  string        $data
+     * @return string
      */
     public function extract(Parser $parser, Node\Variable $var, $data)
     {

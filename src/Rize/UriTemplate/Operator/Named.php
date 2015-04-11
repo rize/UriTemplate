@@ -75,7 +75,7 @@ class Named extends Abstraction
     public function expandNonExplode(Parser $parser, Node\Variable $var, array $val)
     {
         if (empty($val)) {
-            return;
+            return null;
         }
 
         $result  = $this->encode($parser, $var, $var->name);
@@ -94,7 +94,7 @@ class Named extends Abstraction
     public function expandExplode(Parser $parser, Node\Variable $var, array $val)
     {
         if (empty($val)) {
-            return;
+            return null;
         }
 
         $result  = $this->encode($parser, $var, $var->name);
