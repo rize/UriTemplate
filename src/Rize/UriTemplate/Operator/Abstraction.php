@@ -175,31 +175,33 @@ abstract class Abstraction
         $this->reserved = $reserved;
     }
 
+    abstract public function toRegex(Parser $parser, Node\Variable $var);
+
     public function expand(Parser $parser, Node\Variable $var, array $params = array())
     {
         $options    = $var->options;
         $name       = $var->name;
         $is_explode = in_array($options['modifier'], array('*', '%'));
 
-        # skip null
+        // skip null
         if (!isset($params[$name])) {
-            return;
+            return null;
         }
 
         $val  = $params[$name];
 
-        # This algorithm is based on RFC6570 http://tools.ietf.org/html/rfc6570
-        # non-array, e.g. string
+        // This algorithm is based on RFC6570 http://tools.ietf.org/html/rfc6570
+        // non-array, e.g. string
         if (!is_array($val)) {
             return $this->expandString($parser, $var, $val);
         }
 
-        # non-explode ':'
+        // non-explode ':'
         else if (!$is_explode) {
             return $this->expandNonExplode($parser, $var, $val);
         }
 
-        # explode '*', '%'
+        // explode '*', '%'
         else {
             return $this->expandExplode($parser, $var, $val);
         }
@@ -220,11 +222,16 @@ abstract class Abstraction
 
     /**
      * Non explode modifier ':'
+     *
+     * @param Parser $parser
+     * @param Node\Variable $var
+     * @param array $val
+     * @return null|string
      */
     public function expandNonExplode(Parser $parser, Node\Variable $var, array $val)
     {
         if (empty($val)) {
-            return;
+            return null;
         }
 
         return $this->encode($parser, $var, $val);
@@ -232,11 +239,16 @@ abstract class Abstraction
 
     /**
      * Explode modifier '*', '%'
+     *
+     * @param Parser $parser
+     * @param Node\Variable $var
+     * @param array $val
+     * @return null|string
      */
     public function expandExplode(Parser $parser, Node\Variable $var, array $val)
     {
         if (empty($val)) {
-            return;
+            return null;
         }
 
         return $this->encode($parser, $var, $val);
@@ -260,7 +272,7 @@ abstract class Abstraction
         $sep       = $this->sep;
         $assoc_sep = '=';
 
-        # non-explode modifier always use ',' as a separator
+        // non-explode modifier always use ',' as a separator
         if ($var->options['modifier'] !== '*') {
             $assoc_sep = $sep = ',';
         }
@@ -269,17 +281,17 @@ abstract class Abstraction
 
             $encoded = rawurlencode($v);
 
-            # assoc? encode key too
+            // assoc? encode key too
             if (!$list) {
                 $encoded = rawurlencode($k).$assoc_sep.$encoded;
             }
 
-            # rawurlencode is compliant with 'unreserved' set
+            // rawurlencode is compliant with 'unreserved' set
             if (!$reserved) {
                 $v = $encoded;
             }
 
-            # decode chars in reserved set
+            // decode chars in reserved set
             else {
 
                 $v = str_replace(
@@ -320,6 +332,7 @@ abstract class Abstraction
      * @param  Parser        $parser
      * @param  Node\Variable $var
      * @param  string        $data
+     * @return string
      */
     public function extract(Parser $parser, Node\Variable $var, $data)
     {

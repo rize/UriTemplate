@@ -10,13 +10,12 @@ use Rize\UriTemplate\Operator;
  */
 class Expression extends Abstraction
 {
-    public $token,
-           $operator,
+    public $operator,
            $variables = array();
 
     public function __construct($token, Operator\Abstraction $operator, array $variables = null)
     {
-        $this->token     = $token;
+        parent::__construct($token);
         $this->operator  = $operator;
         $this->variables = $variables;
     }
@@ -26,12 +25,12 @@ class Expression extends Abstraction
         $data = array();
         $op   = $this->operator;
 
-        # check for variable modifiers
+        // check for variable modifiers
         foreach($this->variables as $var) {
 
             $val = $op->expand($parser, $var, $params);
 
-            # skip null value
+            // skip null value
             if (!is_null($val)) {
                 $data[] = $val;
             }
@@ -46,17 +45,19 @@ class Expression extends Abstraction
      * @param Parser $parser
      * @param string $uri
      * @param array  $params
+     * @param bool $strict
+     * @return null|array `uri and params` or `null` if not match and $strict is true
      */
     public function match(Parser $parser, $uri, $params = array(), $strict = false)
     {
         $op = $this->operator;
 
-        # check expression operator first
+        // check expression operator first
         if ($op->id and $uri[0] !== $op->id) {
           return array($uri, $params);
         }
 
-        # remove operator from input
+        // remove operator from input
         if ($op->id) {
             $uri = substr($uri, 1);
         }
@@ -67,14 +68,14 @@ class Expression extends Abstraction
 
             if (preg_match($regex, $uri, $match)) {
 
-                # remove matched part from input
+                // remove matched part from input
                 $uri = preg_replace($regex, '', $uri, $limit = 1);
                 $val = $op->extract($parser, $var, $match[0]);
             }
 
-            # if strict is given, we quit immediately when there's no match
+            // if strict is given, we quit immediately when there's no match
             else if ($strict) {
-                return;
+                return null;
             }
 
             $params[$var->token] = $val;
@@ -87,7 +88,8 @@ class Expression extends Abstraction
      * Sort variables before extracting data from uri.
      * We have to sort vars by non-explode to explode.
      *
-     * @params array $vars
+     * @param array $vars
+     * @return array
      */
     protected function sortVariables(array $vars)
     {

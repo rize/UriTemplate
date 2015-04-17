@@ -22,7 +22,7 @@ class UnNamed extends Abstraction
         if ($options['modifier']) {
             switch($options['modifier']) {
                 case '*':
-                    # 2 | 4
+                    // 2 | 4
                     $regex = "{$value}+(?:{$this->sep}{$value}+)*";
                     break;
                 case ':':
@@ -36,7 +36,7 @@ class UnNamed extends Abstraction
         }
 
         else {
-            # 1, 3
+            // 1, 3
             $regex = "{$value}*(?:,{$value}+)*";
         }
 
