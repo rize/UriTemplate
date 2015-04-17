@@ -18,7 +18,7 @@ class Named extends Abstraction
     {
         $regex   = null;
         $name    = $var->name;
-        $value   = '(?:[\w\.\-]|%[\da-fA-F]{2})';
+        $value   = $this->getRegex();
         $options = $var->options;
 
         if ($options['modifier']) {

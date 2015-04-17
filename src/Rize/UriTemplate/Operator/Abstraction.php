@@ -150,6 +150,20 @@ abstract class Abstraction
             '%3D' => '=',
         );
 
+    /**
+     * RFC 3986 Allowed path characters regex except the path delimiter '/'.
+     *
+     * @var string
+     */
+    protected static $pathRegex = '(?:[a-zA-Z0-9\-\._~!\$&\'\(\)\*\+,;=%:@]+|%(?![A-Fa-f0-9]{2}))';
+
+    /**
+     * RFC 3986 Allowed query characters regex except the query parameter delimiter '&'.
+     *
+     * @var string
+     */
+    protected static $queryRegex = '(?:[a-zA-Z0-9\-\._~!\$\'\(\)\*\+,;=%:@\/\?]+|%(?![A-Fa-f0-9]{2}))';
+
     public function __construct($id, $named, $sep, $empty, $reserved, $start, $first)
     {
         $this->id    = $id;
@@ -294,7 +308,7 @@ abstract class Abstraction
         $values = (array)$values;
 
         array_walk($values, function(&$v, $k) {
-            $v = urldecode($v);
+            $v = rawurldecode($v);
         });
 
         return $single ? reset($values) : $values;
@@ -359,5 +373,23 @@ abstract class Abstraction
     public static function isValid($id)
     {
         return isset(static::$types[$id]);
+    }
+
+    /**
+     * Returns the correct regex given the variable location in the URI
+     *
+     * @return string
+     */
+    protected function getRegex()
+    {
+        switch ($this->id) {
+            case '?':
+            case '&':
+            case '#':
+                return self::$queryRegex;
+            case ';':
+            default:
+                return self::$pathRegex;
+        }
     }
 }

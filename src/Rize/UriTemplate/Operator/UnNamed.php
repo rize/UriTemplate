@@ -16,7 +16,7 @@ class UnNamed extends Abstraction
     public function toRegex(Parser $parser, Node\Variable $var)
     {
         $regex   = null;
-        $value   = '(?:[\w\.\-]|%[\da-fA-F]{2})';
+        $value   = $this->getRegex();
         $options = $var->options;
 
         if ($options['modifier']) {
