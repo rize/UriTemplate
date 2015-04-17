@@ -11,6 +11,9 @@ class Parser
 
     /**
      * Parses URI Template and returns nodes
+     *
+     * @param string $template
+     * @return Node\Abstraction[]
      */
     public function parse($template)
     {
@@ -24,16 +27,20 @@ class Parser
         return $nodes;
     }
 
+    /**
+     * @param string $token
+     * @return Node\Abstraction
+     */
     protected function createNode($token)
     {
-        # literal string
+        // literal string
         if ($token[0] !== '{') {
             $node = $this->createLiteralNode($token);
         }
 
         else {
 
-            # remove `{}` from expression and parse it
+            // remove `{}` from expression and parse it
             $node = $this->parseExpression(substr($token, 1, -1));
         }
   
@@ -45,24 +52,24 @@ class Parser
         $token  = $expression;
         $prefix = $token[0];
 
-        # not a valid operator?
+        // not a valid operator?
         if (!Operator\Abstraction::isValid($prefix)) {
 
-            # not valid chars?
+            // not valid chars?
             if (!preg_match('#'.self::REGEX_VARNAME.'#', $token)) {
-                throw new \Exception("Invalid operator [$prefx] found at {$token}");
+                throw new \Exception("Invalid operator [$prefix] found at {$token}");
             }
 
-            # default operator
+            // default operator
             $prefix = null;
         }
 
-        # remove operator prefix if exists e.g. '?'
+        // remove operator prefix if exists e.g. '?'
         if ($prefix) {
             $token = substr($token, 1);
         }
 
-        # parse variables
+        // parse variables
         $vars = array();
         foreach(explode(',', $token) as $var) {
             $vars[] = $this->parseVariable($var);
@@ -81,12 +88,12 @@ class Parser
         $val      = null;
         $modifier = null;
 
-        # check for prefix (:) / explode (*) / array (%) modifier
+        // check for prefix (:) / explode (*) / array (%) modifier
         if (strpos($var, ':') !== false) {
             $modifier = ':';
             list($varname, $val) = explode(':', $var);
 
-            # error checking
+            // error checking
             if (!is_numeric($val)) {
                 throw new \Exception("Value for `:` modifier must be numeric value [$varname:$val]");
             }
@@ -96,7 +103,7 @@ class Parser
             case '*':
             case '%':
 
-                # there can be only 1 modifier per var
+                // there can be only 1 modifier per var
                 if ($modifier) {
                     throw new \Exception("Multiple modifiers per variable are not allowed [$var]");
                 }

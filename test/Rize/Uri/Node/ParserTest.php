@@ -14,7 +14,6 @@ class ParserTest extends PHPUnit_Framework_TestCase
     public function testParseTemplate()
     {
         $input = 'http://www.example.com/{term:1}/{term}/{test*}/foo{?query,number}';
-        $uri   = '/john/profile';
         $expected = array(
             new Node\Literal('http://www.example.com/'),
             new Node\Expression(

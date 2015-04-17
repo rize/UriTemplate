@@ -15,9 +15,9 @@ A very simple usage (string expansion).
 ```php
 <?php
 
-use Rize\UriTemplate;
+use Rize\UriTemplate\UriTemplate;
 
-$uri = new UriTemplate;
+$uri = new UriTemplate();
 $uri->expand('/{username}/profile', ['username' => 'john']);
 
 >> '/john/profile'
@@ -28,6 +28,9 @@ $uri->expand('/{username}/profile', ['username' => 'john']);
 ```php
 <?php
 
+use Rize\UriTemplate\UriTemplate;
+
+$uri = new UriTemplate();
 $uri->expand('/search/{term:1}/{term}/{?q*,limit}', [
     'term'  => 'john',
     'q'     => ['a', 'b'],
@@ -42,6 +45,9 @@ $uri->expand('/search/{term:1}/{term}/{?q*,limit}', [
 ```php
 <?php
 
+use Rize\UriTemplate\UriTemplate;
+
+$uri = new UriTemplate();
 $uri->expand('http://{host}{/segments*}/{file}{.extensions*}', [
     'host'       => 'www.host.com',
     'segments'   => ['path', 'to', 'a'],
@@ -59,6 +65,8 @@ Take a look at real world example.
 ```php
 <?php
 
+use Rize\UriTemplate\UriTemplate;
+
 $uri = new UriTemplate('https://api.twitter.com/{version}', ['version' => 1.1]);
 $uri->expand('/statuses/show/{id}.json', ['id' => '210462857140252672']);
 
@@ -71,6 +79,10 @@ It also supports URI Extraction (extract all variables from URI). Let's take a l
 
 ```php
 <?php
+
+use Rize\UriTemplate\UriTemplate;
+
+$uri = new UriTemplate('https://api.twitter.com/{version}', ['version' => 1.1]);
 
 $params = $uri->extract('/search/{term:1}/{term}/{?q*,limit}', '/search/j/john/?q=a&q=b&limit=10');
 
@@ -94,6 +106,10 @@ Note that in the example above, result returned by `extract` method has an extra
 
 ```php
 <?php
+
+use Rize\UriTemplate\UriTemplate;
+
+$uri = new UriTemplate();
 $uri->extract($template, $uri, $strict = false)
 ```
 
@@ -101,6 +117,10 @@ Normally `extract` method will try to extract vars from a uri even if it's parti
 
 ```php
 <?php
+
+use Rize\UriTemplate\UriTemplate;
+
+$uri = new UriTemplate();
 $params = $uri->extract('/{?a,b}', '/?a=1')
 
 >> print_r($params);
@@ -116,12 +136,17 @@ Which is useful when you want to determine whether the given uri is matched agai
 
 ```php
 <?php
-# Note that variable `b` is absent in uri
+
+use Rize\UriTemplate\UriTemplate;
+
+$uri = new UriTemplate();
+
+// Note that variable `b` is absent in uri
 $params = $uri->extract('/{?a,b}', '/?a=1', true);
 
 >>> null
 
-# Now we give `b` some value
+// Now we give `b` some value
 $params = $uri->extract('/{?a,b}', '/?a=1&b=2', true);
 
 >>> print_r($params)
@@ -150,10 +175,10 @@ $uri->expand('{?list%,keys%}', [
     ),
 ]);
 
-# '?list[]=a&list[]=b&keys[a]=1&keys[b]=2'
+// '?list[]=a&list[]=b&keys[a]=1&keys[b]=2'
 >> '?list%5B%5D=a&list%5B%5D=b&keys%5Ba%5D=1&keys%5Bb%5D=2'
 
-# [] get encoded to %5B%5D i.e. '?list[]=a&list[]=b&keys[a]=1&keys[b]=2'
+// [] get encoded to %5B%5D i.e. '?list[]=a&list[]=b&keys[a]=1&keys[b]=2'
 $params = $uri->extract('{?list%,keys%}', '?list%5B%5D=a&list%5B%5D=b&keys%5Ba%5D=1&keys%5Bb%5D=2', )
 
 >> print_r($params);

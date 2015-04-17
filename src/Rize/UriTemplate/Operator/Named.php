@@ -24,7 +24,7 @@ class Named extends Abstraction
         if ($options['modifier']) {
             switch($options['modifier']) {
                 case '*':
-                    # 2 | 4
+                    // 2 | 4
                     $regex = "{$name}+=(?:{$value}+(?:{$this->sep}{$name}+={$value}*)*)"
                            . "|{$value}+=(?:{$value}+(?:{$this->sep}{$value}+={$value}*)*)";
                     break;
@@ -33,7 +33,7 @@ class Named extends Abstraction
                     break;
 
                 case '%':
-                    # 5
+                    // 5
                     $name  = $name.'+(?:%5B|\[)[^=]*=';
                     $regex = "{$name}(?:{$value}+(?:{$this->sep}{$name}{$value}*)*)";
                     break;
@@ -43,7 +43,7 @@ class Named extends Abstraction
         }
 
         else {
-            # 1, 3
+            // 1, 3
             $regex = "{$name}=(?:{$value}+(?:,{$value}+)*)*";
         }
 
@@ -56,7 +56,7 @@ class Named extends Abstraction
         $options = $var->options;
         $result  = $this->encode($parser, $var, $var->name);
 
-        # handle empty value
+        // handle empty value
         if ($val === '') {
             return $result . $this->empty;
         }
@@ -75,7 +75,7 @@ class Named extends Abstraction
     public function expandNonExplode(Parser $parser, Node\Variable $var, array $val)
     {
         if (empty($val)) {
-            return;
+            return null;
         }
 
         $result  = $this->encode($parser, $var, $var->name);
@@ -94,13 +94,13 @@ class Named extends Abstraction
     public function expandExplode(Parser $parser, Node\Variable $var, array $val)
     {
         if (empty($val)) {
-            return;
+            return null;
         }
 
         $result  = $this->encode($parser, $var, $var->name);
 
-        # RFC6570 doesn't specify how to handle empty list/assoc array
-        # for explode modifier
+        // RFC6570 doesn't specify how to handle empty list/assoc array
+        // for explode modifier
         if (empty($val)) {
             return $result . $this->empty;
         }
@@ -109,7 +109,7 @@ class Named extends Abstraction
         $data  = array();
         foreach($val as $k => $v) {
 
-            # if value is a list, use `varname` as keyname, otherwise use `key` name
+            // if value is a list, use `varname` as keyname, otherwise use `key` name
             $key = $list ? $var->name : $k;
             if ($list) {
                 $data[$key][] = $v;
@@ -120,9 +120,9 @@ class Named extends Abstraction
             }
         }
 
-        # if it's array modifier, we have to use variable name as index
-        # e.g. if variable name is 'query' and value is ['limit' => 1] 
-        # then we convert it to ['query' => ['limit' => 1]]
+        // if it's array modifier, we have to use variable name as index
+        // e.g. if variable name is 'query' and value is ['limit' => 1]
+        // then we convert it to ['query' => ['limit' => 1]]
         if (!$list and $var->options['modifier'] === '%') {
             $data = array($var->name => $data);
         }
@@ -132,7 +132,7 @@ class Named extends Abstraction
 
     public function extract(Parser $parser, Node\Variable $var, $data)
     {
-        # get rid of optional `&` at the beginning
+        // get rid of optional `&` at the beginning
         if ($data[0] === '&') {
             $data = substr($data, 1);
         }
@@ -149,17 +149,16 @@ class Named extends Abstraction
 
             case '*':
                 $data = array();
-                $test = array();
 
                 foreach($vals as $val) {
                     list($k, $v) = explode('=', $val);
 
-                    # 2
+                    // 2
                     if ($k === $var->token) {
                         $data[]   = $v;
                     }
 
-                    # 4
+                    // 4
                     else {
                         $data[$k] = $v;
                     }
@@ -169,8 +168,8 @@ class Named extends Abstraction
             case ':':
                 break;
             default:
-                # 1, 3
-                # remove key from value e.g. 'lang=en,th' becomes 'en,th'
+                // 1, 3
+                // remove key from value e.g. 'lang=en,th' becomes 'en,th'
                 $value = str_replace($var->token.'=', '', $value);
                 $data  = explode(',', $value);
 
@@ -184,28 +183,28 @@ class Named extends Abstraction
 
     public function encodeExplodeVars(Parser $parser, Node\Variable $var, $data)
     {
-        # http_build_query uses PHP_QUERY_RFC1738 encoding by default 
-        # i.e. spaces are encoded as '+' (plus signs) we need to convert
-        # it to %20 RFC3986
+        // http_build_query uses PHP_QUERY_RFC1738 encoding by default
+        // i.e. spaces are encoded as '+' (plus signs) we need to convert
+        // it to %20 RFC3986
         $query = http_build_query($data, null, $this->sep);
         $query = str_replace('+', '%20', $query);
 
-        # `%` array modifier
+        // `%` array modifier
         if ($var->options['modifier'] === '%') {
 
-            # it also uses numeric based-index by default e.g. list[] becomes list[0]
+            // it also uses numeric based-index by default e.g. list[] becomes list[0]
             $query = preg_replace('#%5B\d+%5D#', '%5B%5D', $query);
         }
 
-        # `:`, `*` modifiers
+        // `:`, `*` modifiers
         else {
 
-            # by default, http_build_query will convert array values to `a[]=1&a[]=2`
-            # which is different from the spec. It should be `a=1&a=2`
+            // by default, http_build_query will convert array values to `a[]=1&a[]=2`
+            // which is different from the spec. It should be `a=1&a=2`
             $query = preg_replace('#%5B\d+%5D#', '', $query);
         }
 
-        # handle reserved charset
+        // handle reserved charset
         if ($this->reserved) {
 
             $query = str_replace(

@@ -1,9 +1,6 @@
 <?php
 
-namespace Rize;
-
-use Rize\UriTemplate\Node;
-use Rize\UriTemplate\Parser;
+namespace Rize\UriTemplate;
 
 /**
  * URI Template
@@ -11,14 +8,14 @@ use Rize\UriTemplate\Parser;
 class UriTemplate
 {
              /**
-              * @var Rize\UriTemplate\Parser
+              * @var Parser
               */
     protected $parser,
               $parsed = array(),
               $base_uri,
               $params = array();
 
-    public function __construct($base_uri = '', $params = array(), Node\Parser $parser = null)
+    public function __construct($base_uri = '', $params = array(), Parser $parser = null)
     {
         $this->base_uri = $base_uri;
         $this->params   = $params;
@@ -28,8 +25,9 @@ class UriTemplate
     /**
      * Expands URI Template
      *
-     * @param string $uri_template  URI Template
+     * @param string $uri  URI Template
      * @param array  $params        URI Template's parameters
+     * @return string
      */
     public function expand($uri, $params = array())
     {
@@ -37,7 +35,7 @@ class UriTemplate
         $uri     = $this->base_uri.$uri;
         $result  = array();
 
-        # quick check
+        // quick check
         if (($start = strpos($uri, '{')) === false) {
             return $uri;
         }
@@ -55,9 +53,10 @@ class UriTemplate
     /**
      * Extracts variables from URI
      *
+     * @param  string $template
      * @param  string $uri
      * @param  bool   $strict  This will perform a full match
-     * @return array  params
+     * @return null|array params or null if not match and $strict is true
      */
     public function extract($template, $uri, $strict = false)
     {
@@ -66,20 +65,20 @@ class UriTemplate
 
         foreach($nodes as $node) {
 
-            # if strict is given, and there's no remaining uri just return null
+            // if strict is given, and there's no remaining uri just return null
             if ($strict and !$uri) {
-                return;
+                return null;
             }
 
-            # uri'll be truncated from the start when a match is found
+            // uri'll be truncated from the start when a match is found
             $match = $node->match($this->parser, $uri, $params, $strict);
 
             list($uri, $params) = $match;
         }
 
-        # if there's remaining $uri, matching is failed
+        // if there's remaining $uri, matching is failed
         if ($strict and (bool)$uri) {
-            return;
+            return null;
         }
 
         return $params;
