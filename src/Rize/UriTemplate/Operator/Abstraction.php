@@ -158,7 +158,7 @@ abstract class Abstraction
     protected static $pathRegex = '(?:[a-zA-Z0-9\-\._~!\$&\'\(\)\*\+,;=%:@]+|%(?![A-Fa-f0-9]{2}))';
 
     /**
-     * RFC 3986 Allowed path characters regex except the query parameter delimiter '&'.
+     * RFC 3986 Allowed query characters regex except the query parameter delimiter '&'.
      *
      * @var string
      */
