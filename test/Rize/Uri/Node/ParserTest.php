@@ -1,88 +1,47 @@
 <?php
 
-use Rize\UriTemplate\Node;
-use Rize\UriTemplate\Operator;
-use Rize\UriTemplate\Parser;
+use Rize\UriTemplate;
 
 class ParserTest extends PHPUnit_Framework_TestCase
 {
-    protected function service()
+    public function testParseTemplateWithLiteral()
     {
-        return new Parser;
+        // will pass
+        $uri = new UriTemplate('http://www.example.com/v1/company/', []);
+        $params = $uri->extract('/{countryCode}/{registrationNumber}/test{.format}', '/gb/0123456/test.json');
+        static::assertEquals(array('countryCode' => 'gb', 'registrationNumber' => '0123456', 'format' => 'json'), $params);
     }
 
-    public function testParseTemplate()
+    /**
+     * @depends testParseTemplateWithLiteral
+     */
+    public function testParseTemplateWithTwoVariablesAndDotBetween()
     {
-        $input = 'http://www.example.com/{term:1}/{term}/{test*}/foo{?query,number}';
-        $expected = array(
-            new Node\Literal('http://www.example.com/'),
-            new Node\Expression(
-                'term:1',
-                Operator\Abstraction::createById(''),
-                array(
-                    new Node\Variable(
-                        'term:1',
-                        array(
-                            'modifier' => ':',
-                            'value'    => 1,
-                        )
-                    ),
-                )
-            ),
-            new Node\Literal('/'),
-            new Node\Expression(
-                'term',
-                Operator\Abstraction::createById(''),
-                array(
-                    new Node\Variable(
-                        'term',
-                        array(
-                            'modifier' => null,
-                            'value'    => null,
-                        )
-                    ),
-                )
-            ),
-            new Node\Literal('/'),
-            new Node\Expression(
-                'test*',
-                Operator\Abstraction::createById(''),
-                array(
-                    new Node\Variable(
-                        'test',
-                        array(
-                            'modifier' => '*',
-                            'value'    => null,
-                        )
-                    ),
-                )
-            ),
-            new Node\Literal('/foo'),
-            new Node\Expression(
-                'query,number',
-                Operator\Abstraction::createById('?'),
-                array(
-                    new Node\Variable(
-                        'query',
-                        array(
-                            'modifier' => null,
-                            'value'    => null,
-                        )
-                    ),
-                    new Node\Variable(
-                        'number',
-                        array(
-                            'modifier' => null,
-                            'value'    => null,
-                        )
-                    ),
-                )
-            ),
-        );
+        // will fail
+        $uri = new UriTemplate('http://www.example.com/v1/company/', []);
+        $params = $uri->extract('/{countryCode}/{registrationNumber}{.format}', '/gb/0123456.json');
+        static::assertEquals(array('countryCode' => 'gb', 'registrationNumber' => '0123456', 'format' => 'json'), $params);
+    }
 
-        $service = $this->service();
-        $actual  = $service->parse($input);
+    /**
+     * @ depends testParseTemplateWithLiteral
+     */
+    public function testParseTemplateWithTwoVariablesAndDotBetweenStrict()
+    {
+        // will fail
+        $uri = new UriTemplate('http://www.example.com/v1/company/', []);
+        $params = $uri->extract('/{countryCode}/{registrationNumber}{.format}', '/gb/0123456.json', true);
+        static::assertEquals(array('countryCode' => 'gb', 'registrationNumber' => '0123456', 'format' => 'json'), $params);
+    }
 
-        $this->assertEquals($expected, $actual);
+    /**
+     * @ depends testParseTemplateWithLiteral
+     */
+    public function testParseTemplateWithThreeVariablesAndDotBetweenStrict()
+    {
+        // will fail
+        $uri = new UriTemplate('http://www.example.com/v1/company/', []);
+        $params = $uri->extract('/{countryCode}/{registrationNumber}{.namespace}{.format}', '/gb/0123456.company.json');
+        static::assertEquals(array('countryCode' => 'gb', 'registrationNumber' => '0123456', 'namespace' => 'company', 'format' => 'json'), $params);
     }
 }

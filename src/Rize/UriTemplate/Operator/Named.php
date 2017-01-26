@@ -154,7 +154,7 @@ class Named extends Abstraction
                     list($k, $v) = explode('=', $val);
 
                     // 2
-                    if ($k === $var->token) {
+                    if ($k === $var->getToken()) {
                         $data[]   = $v;
                     }
 
@@ -170,7 +170,7 @@ class Named extends Abstraction
             default:
                 // 1, 3
                 // remove key from value e.g. 'lang=en,th' becomes 'en,th'
-                $value = str_replace($var->token.'=', '', $value);
+                $value = str_replace($var->getToken().'=', '', $value);
                 $data  = explode(',', $value);
 
                 if (sizeof($data) === 1) {

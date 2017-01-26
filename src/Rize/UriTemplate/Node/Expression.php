@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Rize\UriTemplate\Node;
 
@@ -10,16 +10,67 @@ use Rize\UriTemplate\Operator;
  */
 class Expression extends Abstraction
 {
-    public $operator,
-           $variables = array();
+    /**
+     * @var Operator\Abstraction
+     */
+    private $operator;
 
-    public function __construct($token, Operator\Abstraction $operator, array $variables = null)
+    /**
+     * @var array
+     */
+    private $variables = array();
+
+    /**
+     * Whether to do a forward lookup for a given separator
+     * @var string
+     */
+    private $forwardLookupSeparator;
+
+    public function __construct($token, Operator\Abstraction $operator, array $variables = null, $forwardLookupSeparator = null)
     {
         parent::__construct($token);
         $this->operator  = $operator;
         $this->variables = $variables;
+        $this->forwardLookupSeparator = $forwardLookupSeparator;
     }
 
+    /**
+     * @return Operator\Abstraction
+     */
+    public function getOperator()
+    {
+        return $this->operator;
+    }
+
+    /**
+     * @return array
+     */
+    public function getVariables()
+    {
+        return $this->variables;
+    }
+
+    /**
+     * @return string
+     */
+    public function getForwardLookupSeparator()
+    {
+        return $this->forwardLookupSeparator;
+    }
+
+    /**
+     * @param string $forwardLookupSeparator
+     */
+    public function setForwardLookupSeparator($forwardLookupSeparator)
+    {
+        $this->forwardLookupSeparator = $forwardLookupSeparator;
+    }
+
+    /**
+     * @param Parser $parser
+     * @param array $params
+     * @return null|string
+     */
     public function expand(Parser $parser, array $params = array())
     {
         $data = array();
@@ -53,7 +104,7 @@ class Expression extends Abstraction
         $op = $this->operator;
 
         // check expression operator first
-        if ($op->id and $uri[0] !== $op->id) {
+        if ($op->id && $uri[0] !== $op->id) {
           return array($uri, $params);
         }
 
@@ -63,13 +114,23 @@ class Expression extends Abstraction
         }
 
         foreach($this->sortVariables($this->variables) as $var) {
+            /** @var \Rize\UriTemplate\Node\Variable $regex */
             $regex = '#'.$op->toRegex($parser, $var).'#';
             $val   = null;
 
-            if (preg_match($regex, $uri, $match)) {
+            // do a forward lookup and get just the relevant part
+            $remainingUri = '';
+            $preparedUri = $uri;
+            if ($this->forwardLookupSeparator) {
+                $lastOccurrenceOfSeparator = stripos($uri, $this->forwardLookupSeparator);
+                $preparedUri = substr($uri, 0, $lastOccurrenceOfSeparator);
+                $remainingUri = substr($uri, $lastOccurrenceOfSeparator);
+            }
+
+            if (preg_match($regex, $preparedUri, $match)) {
 
                 // remove matched part from input
-                $uri = preg_replace($regex, '', $uri, $limit = 1);
+                $preparedUri = preg_replace($regex, '', $preparedUri, $limit = 1);
                 $val = $op->extract($parser, $var, $match[0]);
             }
 
@@ -78,7 +139,9 @@ class Expression extends Abstraction
                 return null;
             }
 
-            $params[$var->token] = $val;
+            $uri = $preparedUri . $remainingUri;
+
+            $params[$var->getToken()] = $val;
         }
 
         return array($uri, $params);

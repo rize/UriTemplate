@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 namespace Rize\UriTemplate\Node;
 
@@ -9,7 +9,11 @@ use Rize\UriTemplate\Parser;
  */
 abstract class Abstraction
 {
-    public $token;
+    /**
+     * @var string
+     */
+    private $token;
+
     public function __construct($token)
     {
         $this->token = $token;
@@ -20,6 +24,7 @@ abstract class Abstraction
      *
      * @param Parser $parser
      * @param array  $params
+     * @return null|string
      */
     public function expand(Parser $parser, array $params = array())
     {
@@ -49,5 +54,13 @@ abstract class Abstraction
         }
 
         return array($uri, $params);
+    }
+
+    /**
+     * @return string
+     */
+    public function getToken()
+    {
+        return $this->token;
     }
 }
