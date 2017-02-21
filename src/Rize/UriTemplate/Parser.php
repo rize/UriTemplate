@@ -3,7 +3,9 @@
 namespace Rize\UriTemplate;
 
 use Rize\UriTemplate\Node;
+use Rize\UriTemplate\Node\Expression;
 use Rize\UriTemplate\Operator;
+use Rize\UriTemplate\Operator\UnNamed;
 
 class Parser
 {
@@ -21,7 +23,20 @@ class Parser
         $nodes   = array();
 
         foreach($parts as $part) {
-            $nodes[] = $this->createNode($part);
+            $node = $this->createNode($part);
+
+            // if current node has dot separator that requires a forward lookup
+            // for the previous node iff previous node's operator is UnNamed
+            if ($node instanceof Expression && $node->getOperator()->id === '.') {
+                if (sizeof($nodes) > 0) {
+                    $previousNode = $nodes[sizeof($nodes) - 1];
+                    if ($previousNode instanceof Expression && $previousNode->getOperator() instanceof UnNamed) {
+                        $previousNode->setForwardLookupSeparator($node->getOperator()->id);
+                    }
+                }
+            }
+
+            $nodes[] = $node;
         }
 
         return $nodes;
@@ -36,14 +51,11 @@ class Parser
         // literal string
         if ($token[0] !== '{') {
             $node = $this->createLiteralNode($token);
-        }
-
-        else {
-
+        } else {
             // remove `{}` from expression and parse it
             $node = $this->parseExpression(substr($token, 1, -1));
         }
-  
+
         return $node;
     }
 
