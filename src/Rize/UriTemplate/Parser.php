@@ -27,7 +27,7 @@ class Parser
 
             // if current node has dot separator that requires a forward lookup
             // for the previous node iff previous node's operator is UnNamed
-            if ($node instanceof Expression && $node->getOperator()->id == '.') {
+            if ($node instanceof Expression && $node->getOperator()->id === '.') {
                 if (sizeof($nodes) > 0) {
                     $previousNode = $nodes[sizeof($nodes) - 1];
                     if ($previousNode instanceof Expression && $previousNode->getOperator() instanceof UnNamed) {
