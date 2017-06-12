@@ -1,7 +1,6 @@
 <?php
 error_reporting(-1);
 use Rize\UriTemplate\UriTemplate;
-use Rize\UriTemplate\Node;
 
 /**
  * URI Template
@@ -352,7 +351,7 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
     public function dataExtraction()
     {
         return array(
-           array(
+            array(
                 '/no/{term:1}/random/foo{?query,list%,keys%}',
                 '/no/j/random/foo?query=1,2,3&list%5B%5D=a&list%5B%5D=b&keys%5Ba%5D=1&keys%5Bb%5D=2&keys%5Bc%5D%5Btest%5D%5Btest%5D=1',
                 array(
@@ -416,6 +415,13 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
                     'lang'   => array('th', 'jp', 'en'),
                     'term'   => 'john',
                     'term:1' => 'j',
+                ),
+            ),
+            array(
+                '/foo/bar/{number}',
+                '/foo/bar/0',
+                array(
+                    'number' => 0,
                 ),
             ),
         );
@@ -528,6 +534,13 @@ class UriTemplateTest extends \PHPUnit_Framework_TestCase
                         'Hello World!',
                         '3',
                     ),
+                ),
+            ),
+            array(
+                '/foo/bar/{number}',
+                '/foo/bar/0',
+                array(
+                    'number' => 0,
                 ),
             ),
             array(
