@@ -68,7 +68,7 @@ class UriTemplate
         foreach($nodes as $node) {
 
             // if strict is given, and there's no remaining uri just return null
-            if ($strict && !$uri) {
+            if ($strict && !strlen($uri)) {
                 return null;
             }
 
@@ -79,7 +79,7 @@ class UriTemplate
         }
 
         // if there's remaining $uri, matching is failed
-        if ($strict && (bool)$uri) {
+        if ($strict && strlen($uri)) {
             return null;
         }
 
