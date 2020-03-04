@@ -1,5 +1,6 @@
 <?php
 error_reporting(-1);
+use PHPUnit\Framework\TestCase;
 use Rize\UriTemplate\UriTemplate;
 
 /**
@@ -7,7 +8,7 @@ use Rize\UriTemplate\UriTemplate;
  *
  * http://tools.ietf.org/html/rfc6570
  */
-class UriTemplateTest extends \PHPUnit_Framework_TestCase
+class UriTemplateTest extends TestCase
 {
     public function service($uri = '', $params = array())
     {
