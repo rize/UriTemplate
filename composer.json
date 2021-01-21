@@ -20,5 +20,8 @@
         "psr-4": {
             "Rize\\": "src/Rize"
         }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit test/"
     }
 }
