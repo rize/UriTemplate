@@ -108,7 +108,7 @@ class ParserTest extends TestCase
     }
 
     /**
-     * @ depends testParseTemplateWithLiteral
+     * @depends testParseTemplateWithLiteral
      */
     public function testParseTemplateWithTwoVariablesAndDotBetweenStrict()
     {
@@ -119,7 +119,7 @@ class ParserTest extends TestCase
     }
 
     /**
-     * @ depends testParseTemplateWithLiteral
+     * @depends testParseTemplateWithLiteral
      */
     public function testParseTemplateWithThreeVariablesAndDotBetweenStrict()
     {
