@@ -2,7 +2,6 @@
 
 This is a URI Template implementation in PHP based on [RFC 6570 URI Template](http://tools.ietf.org/html/rfc6570). In addition to URI expansion, it also supports URI extraction (200+ test cases).
 
-
 ![CI](https://github.com/rize/UriTemplate/workflows/CI/badge.svg) [![Total Downloads](https://poser.pugx.org/rize/uri-template/downloads.png)](https://packagist.org/packages/rize/uri-template)
 [![Financial Contributors on Open Collective](https://opencollective.com/rize-uri-template/all/badge.svg?label=financial+contributors)](https://opencollective.com/rize-uri-template) 
 
