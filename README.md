@@ -3,6 +3,7 @@
 This is a URI Template implementation in PHP based on [RFC 6570 URI Template](http://tools.ietf.org/html/rfc6570). In addition to URI expansion, it also supports URI extraction (200+ test cases).
 
 ![CI](https://github.com/rize/UriTemplate/workflows/CI/badge.svg) [![Total Downloads](https://poser.pugx.org/rize/uri-template/downloads.png)](https://packagist.org/packages/rize/uri-template)
+[![Financial Contributors on Open Collective](https://opencollective.com/rize-uri-template/all/badge.svg?label=financial+contributors)](https://opencollective.com/rize-uri-template) 
 
 * [Node.js/Javascript](https://github.com/rezigned/uri-template.js) URI Template
 
@@ -216,3 +217,33 @@ Using `composer`
 * **0.2.5** Add strict mode support for `extract` method
 * **0.3.0** Improve code quality + RFC3986 support for `extract` method by @Maks3w
 * **0.3.1** Improve `extract` method to parse two or more adjacent variables separated by dot by @corleonis
+
+## Contributors
+
+### Code Contributors
+
+This project exists thanks to all the people who contribute. [[Contribute](CONTRIBUTING.md)].
+<a href="https://github.com/rize/UriTemplate/graphs/contributors"><img src="https://opencollective.com/rize-uri-template/contributors.svg?width=890&button=false" /></a>
+
+### Financial Contributors
+
+Become a financial contributor and help us sustain our community. [[Contribute](https://opencollective.com/rize-uri-template/contribute)]
+
+#### Individuals
+
+<a href="https://opencollective.com/rize-uri-template"><img src="https://opencollective.com/rize-uri-template/individuals.svg?width=890"></a>
+
+#### Organizations
+
+Support this project with your organization. Your logo will show up here with a link to your website. [[Contribute](https://opencollective.com/rize-uri-template/contribute)]
+
+<a href="https://opencollective.com/rize-uri-template/organization/0/website"><img src="https://opencollective.com/rize-uri-template/organization/0/avatar.svg"></a>
+<a href="https://opencollective.com/rize-uri-template/organization/1/website"><img src="https://opencollective.com/rize-uri-template/organization/1/avatar.svg"></a>
+<a href="https://opencollective.com/rize-uri-template/organization/2/website"><img src="https://opencollective.com/rize-uri-template/organization/2/avatar.svg"></a>
+<a href="https://opencollective.com/rize-uri-template/organization/3/website"><img src="https://opencollective.com/rize-uri-template/organization/3/avatar.svg"></a>
+<a href="https://opencollective.com/rize-uri-template/organization/4/website"><img src="https://opencollective.com/rize-uri-template/organization/4/avatar.svg"></a>
+<a href="https://opencollective.com/rize-uri-template/organization/5/website"><img src="https://opencollective.com/rize-uri-template/organization/5/avatar.svg"></a>
+<a href="https://opencollective.com/rize-uri-template/organization/6/website"><img src="https://opencollective.com/rize-uri-template/organization/6/avatar.svg"></a>
+<a href="https://opencollective.com/rize-uri-template/organization/7/website"><img src="https://opencollective.com/rize-uri-template/organization/7/avatar.svg"></a>
+<a href="https://opencollective.com/rize-uri-template/organization/8/website"><img src="https://opencollective.com/rize-uri-template/organization/8/avatar.svg"></a>
+<a href="https://opencollective.com/rize-uri-template/organization/9/website"><img src="https://opencollective.com/rize-uri-template/organization/9/avatar.svg"></a>
