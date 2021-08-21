@@ -4,8 +4,9 @@ use Rize\UriTemplate;
 use Rize\UriTemplate\Node;
 use Rize\UriTemplate\Operator;
 use Rize\UriTemplate\Parser;
+use PHPUnit\Framework\TestCase;
 
-class ParserTest extends PHPUnit_Framework_TestCase
+class ParserTest extends TestCase
 {
     protected function service()
     {
@@ -107,7 +108,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @ depends testParseTemplateWithLiteral
+     * @depends testParseTemplateWithLiteral
      */
     public function testParseTemplateWithTwoVariablesAndDotBetweenStrict()
     {
@@ -118,7 +119,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @ depends testParseTemplateWithLiteral
+     * @depends testParseTemplateWithLiteral
      */
     public function testParseTemplateWithThreeVariablesAndDotBetweenStrict()
     {
