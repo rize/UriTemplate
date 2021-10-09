@@ -19,7 +19,7 @@ class Parser
      */
     public function parse($template)
     {
-        $parts   = preg_split('#(\{[^\}]+\})#', $template, null, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
+        $parts   = preg_split('#(\{[^\}]+\})#', $template, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
         $nodes   = array();
 
         foreach($parts as $part) {
