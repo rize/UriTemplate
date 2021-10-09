@@ -186,7 +186,7 @@ class Named extends Abstraction
         // http_build_query uses PHP_QUERY_RFC1738 encoding by default
         // i.e. spaces are encoded as '+' (plus signs) we need to convert
         // it to %20 RFC3986
-        $query = http_build_query($data, null, $this->sep);
+        $query = http_build_query($data, '', $this->sep);
         $query = str_replace('+', '%20', $query);
 
         // `%` array modifier

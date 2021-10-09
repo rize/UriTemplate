@@ -65,10 +65,13 @@ class UriTemplate
         $params = array();
         $nodes  = $this->parser->parse($template);
 
+        # PHP 8.1.0RC4-dev still throws deprecation warning for `strlen`.
+        # $uri    = (string) $uri;
+
         foreach($nodes as $node) {
 
             // if strict is given, and there's no remaining uri just return null
-            if ($strict && !strlen($uri)) {
+            if ($strict && !strlen((string) $uri)) {
                 return null;
             }
 
@@ -79,7 +82,7 @@ class UriTemplate
         }
 
         // if there's remaining $uri, matching is failed
-        if ($strict && strlen($uri)) {
+        if ($strict && strlen((string) $uri)) {
             return null;
         }
 
