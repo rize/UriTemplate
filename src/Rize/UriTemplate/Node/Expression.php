@@ -104,7 +104,7 @@ class Expression extends Abstraction
         $op = $this->operator;
 
         // check expression operator first
-        if ($op->id && $uri[0] !== $op->id) {
+        if ($op->id && isset($uri[0]) && $uri[0] !== $op->id) {
           return array($uri, $params);
         }
 
