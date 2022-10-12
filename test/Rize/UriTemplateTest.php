@@ -425,6 +425,14 @@ class UriTemplateTest extends TestCase
                     'number' => 0,
                 ),
             ),
+            array(
+                '/some/{path}{?ref}',
+                '/some/foo',
+                array(
+                    'path' => 'foo',
+                    'ref' => null,
+                ),
+            ),
         );
     }
 
