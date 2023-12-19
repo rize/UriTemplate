@@ -1,8 +1,13 @@
 name: CI
 
 on:
-  - pull_request
-  - push
+  push:
+    branches:
+    - master
+  pull_request:
+    branches:
+    - master
+  workflow_dispatch:
 
 jobs:
   tests:
@@ -11,7 +16,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php-versions: ['7.1', '7.2', '7.3', '7.4']
+        php-versions: ['7.3', '7.4']
 
     steps:
     - name: Checkout
@@ -34,7 +39,7 @@ jobs:
     strategy:
       fail-fast: true
       matrix:
-        php-versions: ['8.0', '8.1']
+        php-versions: ['8.1', '8.2', '8.3']
 
     steps:
     - name: Checkout
