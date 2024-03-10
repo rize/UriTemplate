@@ -15,7 +15,7 @@ class UriTemplateTest extends TestCase
         return new UriTemplate($uri, $params);
     }
 
-    public function dataExpansion()
+    public static function dataExpansion()
     {
         $params = array(
             'count' => array("one", "two", "three"),
@@ -249,7 +249,7 @@ class UriTemplateTest extends TestCase
         );
     }
 
-    public function dataExpandWithArrayModifier()
+    public static function dataExpandWithArrayModifier()
     {
         return array(
             # List
@@ -302,7 +302,7 @@ class UriTemplateTest extends TestCase
         );
     }
 
-    public function dataBaseTemplate()
+    public static function dataBaseTemplate()
     {
         return array(
             array(
@@ -349,7 +349,7 @@ class UriTemplateTest extends TestCase
         );
     }
 
-    public function dataExtraction()
+    public static function dataExtraction()
     {
         return array(
             array(
@@ -511,7 +511,7 @@ class UriTemplateTest extends TestCase
         }
     }
 
-    public function dataExtractStrictMode()
+    public static function dataExtractStrictMode()
     {
         $dataTest = array(
 
@@ -626,7 +626,7 @@ class UriTemplateTest extends TestCase
         return $dataTest;
     }
 
-    public function extractStrictModeNotMatchProvider()
+    public static function extractStrictModeNotMatchProvider()
     {
         return array(
             array(
