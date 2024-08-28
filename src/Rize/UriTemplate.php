@@ -17,7 +17,7 @@ class UriTemplate
               $base_uri,
               $params = array();
 
-    public function __construct($base_uri = '', $params = array(), Parser $parser = null)
+    public function __construct($base_uri = '', $params = array(), ?Parser $parser = null)
     {
         $this->base_uri = $base_uri;
         $this->params   = $params;
