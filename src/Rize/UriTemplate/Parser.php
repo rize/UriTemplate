@@ -2,14 +2,15 @@
 
 namespace Rize\UriTemplate;
 
-use Rize\UriTemplate\Node;
+use Exception;
+use Rize\UriTemplate\Node\Abstraction;
 use Rize\UriTemplate\Node\Expression;
-use Rize\UriTemplate\Operator;
+use Rize\UriTemplate\Node\Variable;
 use Rize\UriTemplate\Operator\UnNamed;
 
 class Parser
 {
-    const REGEX_VARNAME = '(?:[A-z0-9_\.]|%[0-9a-fA-F]{2})';
+    private const REGEX_VARNAME = '(?:[A-z0-9_\.]|%[0-9a-fA-F]{2})';
 
     /**
      * Parses URI Template and returns nodes
@@ -20,7 +21,7 @@ class Parser
     public function parse($template)
     {
         $parts   = preg_split('#(\{[^\}]+\})#', $template, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
-        $nodes   = array();
+        $nodes   = [];
 
         foreach($parts as $part) {
             $node = $this->createNode($part);
@@ -28,8 +29,8 @@ class Parser
             // if current node has dot separator that requires a forward lookup
             // for the previous node iff previous node's operator is UnNamed
             if ($node instanceof Expression && $node->getOperator()->id === '.') {
-                if (sizeof($nodes) > 0) {
-                    $previousNode = $nodes[sizeof($nodes) - 1];
+                if (count($nodes) > 0) {
+                    $previousNode = $nodes[count($nodes) - 1];
                     if ($previousNode instanceof Expression && $previousNode->getOperator() instanceof UnNamed) {
                         $previousNode->setForwardLookupSeparator($node->getOperator()->id);
                     }
@@ -42,11 +43,7 @@ class Parser
         return $nodes;
     }
 
-    /**
-     * @param string $token
-     * @return Node\Abstraction
-     */
-    protected function createNode($token)
+    protected function createNode(string $token): Abstraction
     {
         // literal string
         if ($token[0] !== '{') {
@@ -59,7 +56,7 @@ class Parser
         return $node;
     }
 
-    protected function parseExpression($expression)
+    protected function parseExpression(string $expression): Expression
     {
         $token  = $expression;
         $prefix = $token[0];
@@ -68,8 +65,8 @@ class Parser
         if (!Operator\Abstraction::isValid($prefix)) {
 
             // not valid chars?
-            if (!preg_match('#'.self::REGEX_VARNAME.'#', $token)) {
-                throw new \Exception("Invalid operator [$prefix] found at {$token}");
+            if (!preg_match('#' . self::REGEX_VARNAME . '#', $token)) {
+                throw new Exception("Invalid operator [$prefix] found at {$token}");
             }
 
             // default operator
@@ -82,7 +79,7 @@ class Parser
         }
 
         // parse variables
-        $vars = array();
+        $vars = [];
         foreach(explode(',', $token) as $var) {
             $vars[] = $this->parseVariable($var);
         }
@@ -90,24 +87,24 @@ class Parser
         return $this->createExpressionNode(
             $token,
             $this->createOperatorNode($prefix),
-            $vars
+            $vars,
         );
     }
 
-    protected function parseVariable($var)
+    protected function parseVariable(string $var): Variable
     {
         $var      = trim($var);
         $val      = null;
         $modifier = null;
 
         // check for prefix (:) / explode (*) / array (%) modifier
-        if (strpos($var, ':') !== false) {
+        if (str_contains($var, ':')) {
             $modifier = ':';
-            list($varname, $val) = explode(':', $var);
+            [$varname, $val] = explode(':', $var);
 
             // error checking
             if (!is_numeric($val)) {
-                throw new \Exception("Value for `:` modifier must be numeric value [$varname:$val]");
+                throw new Exception("Value for `:` modifier must be numeric value [$varname:$val]");
             }
         }
 
@@ -117,7 +114,7 @@ class Parser
 
                 // there can be only 1 modifier per var
                 if ($modifier) {
-                    throw new \Exception("Multiple modifiers per variable are not allowed [$var]");
+                    throw new Exception("Multiple modifiers per variable are not allowed [$var]");
                 }
 
                 $modifier = $last;
@@ -127,29 +124,26 @@ class Parser
 
         return $this->createVariableNode(
             $var,
-            array(
-                'modifier' => $modifier,
-                'value'    => $val,
-            )
+            ['modifier' => $modifier, 'value'    => $val],
         );
     }
 
-    protected function createVariableNode($token, $options = array())
+    protected function createVariableNode($token, $options = []): Variable
     {
         return new Node\Variable($token, $options);
     }
 
-    protected function createExpressionNode($token, Operator\Abstraction $operator = null, array $vars = array())
+    protected function createExpressionNode($token, Operator\Abstraction $operator = null, array $vars = []): Node\Expression
     {
         return new Node\Expression($token, $operator, $vars);
     }
 
-    protected function createLiteralNode($token)
+    protected function createLiteralNode(string $token): Node\Literal
     {
         return new Node\Literal($token);
     }
 
-    protected function createOperatorNode($token)
+    protected function createOperatorNode($token): Operator\Abstraction
     {
         return Operator\Abstraction::createById($token);
     }

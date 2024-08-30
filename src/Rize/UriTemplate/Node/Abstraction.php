@@ -9,24 +9,13 @@ use Rize\UriTemplate\Parser;
  */
 abstract class Abstraction
 {
-    /**
-     * @var string
-     */
-    private $token;
-
-    public function __construct($token)
-    {
-        $this->token = $token;
-    }
+    public function __construct(private string $token) {}
 
     /**
+     * @param array<string, mixed> $params
      * Expands URI template
-     *
-     * @param Parser $parser
-     * @param array  $params
-     * @return null|string
      */
-    public function expand(Parser $parser, array $params = array())
+    public function expand(Parser $parser, array $params = []): ?string
     {
         return $this->token;
     }
@@ -34,32 +23,26 @@ abstract class Abstraction
     /**
      * Matches given URI against current node
      *
-     * @param Parser $parser
-     * @param string $uri
-     * @param array  $params
-     * @param bool $strict
-     * @return null|array `uri and params` or `null` if not match and $strict is true
+     * @param array<string, mixed> $params
+     * @return null|array{0: string, 1: array<string, mixed>} `uri and params` or `null` if not match and $strict is true
      */
-    public function match(Parser $parser, $uri, $params = array(), $strict = false)
+    public function match(Parser $parser, string $uri, array $params = [], bool $strict = false): ?array
     {
         // match literal string from start to end
         $length = strlen($this->token);
-        if (substr($uri, 0, $length) === $this->token) {
+        if (strpos($uri, $this->token) === 0) {
             $uri = substr($uri, $length);
         }
 
         // when there's no match, just return null if strict mode is given
-        else if ($strict) {
+        elseif ($strict) {
             return null;
         }
 
-        return array($uri, $params);
+        return [$uri, $params];
     }
 
-    /**
-     * @return string
-     */
-    public function getToken()
+    public function getToken(): string
     {
         return $this->token;
     }

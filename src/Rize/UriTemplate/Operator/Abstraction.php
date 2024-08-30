@@ -2,6 +2,7 @@
 
 namespace Rize\UriTemplate\Operator;
 
+use Exception;
 use Rize\UriTemplate\Node;
 use Rize\UriTemplate\Parser;
 
@@ -35,7 +36,7 @@ use Rize\UriTemplate\Parser;
  *
  * RESERVED
  * --------
- * RFC 1738 ":" | "/" | "?" |                 | "@" | "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "=" | "-" | "_" | "." | 
+ * RFC 1738 ":" | "/" | "?" |                 | "@" | "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "=" | "-" | "_" | "." |
  * RFC 3986 ":" | "/" | "?" | "#" | "[" | "]" | "@" | "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "="
  * RFC 6570 ":" | "/" | "?" | "#" | "[" | "]" | "@" | "!" | "$" | "&" | "'" | "(" | ")" | "*" | "+" | "," | ";" | "="
  *
@@ -50,105 +51,21 @@ abstract class Abstraction
      * named - Whether or not the expansion includes the variable or key name
      * reserved - union of (unreserved / reserved / pct-encoded)
      */
-    public $id,
-           $named,
-           $sep,
-           $empty,
-           $reserved,
-           $start,
-           $first;
+    public $id;
+    public $named;
+    public $sep;
+    public $empty;
+    public $reserved;
+    public $start;
+    public $first;
 
-    protected static $types = array(
-                  '' => array(
-                     'sep'   => ',',
-                     'named' => false,
-                     'empty' => '',
-                     'reserved' => false,
-                     'start' => 0,
-                     'first' => null,
-                  ),
-                  '+' => array(
-                     'sep'   => ',',
-                     'named' => false,
-                     'empty' => '',
-                     'reserved' => true,
-                     'start' => 1,
-                     'first' => null,
-                  ),
-                  '.' => array(
-                     'sep'   => '.',
-                     'named' => false,
-                     'empty' => '',
-                     'reserved' => false,
-                     'start' => 1,
-                     'first' => '.',
-                  ),
-                  '/' => array(
-                     'sep'   => '/',
-                     'named' => false,
-                     'empty' => '',
-                     'reserved' => false,
-                     'start' => 1,
-                     'first' => '/',
-                  ),
-                  ';' => array(
-                     'sep'   => ';',
-                     'named' => true,
-                     'empty' => '',
-                     'reserved' => false,
-                     'start' => 1,
-                     'first' => ';',
-                  ),
-                  '?' => array(
-                     'sep'   => '&',
-                     'named' => true,
-                     'empty' => '=',
-                     'reserved' => false,
-                     'start' => 1,
-                     'first' => '?',
-                  ),
-                  '&' => array(
-                     'sep'   => '&',
-                     'named' => true,
-                     'empty' => '=',
-                     'reserved' => false,
-                     'start' => 1,
-                     'first' => '&',
-                  ),
-                  '#' => array(
-                     'sep'   => ',',
-                     'named' => false,
-                     'empty' => '',
-                     'reserved' => true,
-                     'start' => 1,
-                     'first' => '#',
-                  ),
-              ),
-              $loaded = array();
+    protected static $types = ['' => ['sep'   => ',', 'named' => false, 'empty' => '', 'reserved' => false, 'start' => 0, 'first' => null], '+' => ['sep'   => ',', 'named' => false, 'empty' => '', 'reserved' => true, 'start' => 1, 'first' => null], '.' => ['sep'   => '.', 'named' => false, 'empty' => '', 'reserved' => false, 'start' => 1, 'first' => '.'], '/' => ['sep'   => '/', 'named' => false, 'empty' => '', 'reserved' => false, 'start' => 1, 'first' => '/'], ';' => ['sep'   => ';', 'named' => true, 'empty' => '', 'reserved' => false, 'start' => 1, 'first' => ';'], '?' => ['sep'   => '&', 'named' => true, 'empty' => '=', 'reserved' => false, 'start' => 1, 'first' => '?'], '&' => ['sep'   => '&', 'named' => true, 'empty' => '=', 'reserved' => false, 'start' => 1, 'first' => '&'], '#' => ['sep'   => ',', 'named' => false, 'empty' => '', 'reserved' => true, 'start' => 1, 'first' => '#']];
+    protected static $loaded = [];
 
-        /**
-         * gen-delims | sub-delims
-         */
-    public static $reserved_chars = array(
-            '%3A' => ':',
-            '%2F' => '/',
-            '%3F' => '?',
-            '%23' => '#',
-            '%5B' => '[',
-            '%5D' => ']',
-            '%40' => '@',
-            '%21' => '!',
-            '%24' => '$',
-            '%26' => '&',
-            '%27' => "'",
-            '%28' => '(',
-            '%29' => ')',
-            '%2A' => '*',
-            '%2B' => '+',
-            '%2C' => ',',
-            '%3B' => ';',
-            '%3D' => '=',
-        );
+    /**
+     * gen-delims | sub-delims
+     */
+    public static $reserved_chars = ['%3A' => ':', '%2F' => '/', '%3F' => '?', '%23' => '#', '%5B' => '[', '%5D' => ']', '%40' => '@', '%21' => '!', '%24' => '$', '%26' => '&', '%27' => "'", '%28' => '(', '%29' => ')', '%2A' => '*', '%2B' => '+', '%2C' => ',', '%3B' => ';', '%3D' => '='];
 
     /**
      * RFC 3986 Allowed path characters regex except the path delimiter '/'.
@@ -175,13 +92,13 @@ abstract class Abstraction
         $this->reserved = $reserved;
     }
 
-    abstract public function toRegex(Parser $parser, Node\Variable $var);
+    abstract public function toRegex(Parser $parser, Node\Variable $var): string;
 
-    public function expand(Parser $parser, Node\Variable $var, array $params = array())
+    public function expand(Parser $parser, Node\Variable $var, array $params = [])
     {
         $options    = $var->options;
         $name       = $var->name;
-        $is_explode = in_array($options['modifier'], array('*', '%'));
+        $is_explode = in_array($options['modifier'], ['*', '%']);
 
         // skip null
         if (!isset($params[$name])) {
@@ -197,7 +114,7 @@ abstract class Abstraction
         }
 
         // non-explode ':'
-        else if (!$is_explode) {
+        elseif (!$is_explode) {
             return $this->expandNonExplode($parser, $var, $val);
         }
 
@@ -209,15 +126,15 @@ abstract class Abstraction
 
     public function expandString(Parser $parser, Node\Variable $var, $val)
     {
-        $val     = (string)$val;
+        $val     = (string) $val;
         $options = $var->options;
         $result  = null;
 
         if ($options['modifier'] === ':') {
-            $val = substr($val, 0, (int)$options['value']);
+            $val = substr($val, 0, (int) $options['value']);
         }
 
-        return $result.$this->encode($parser, $var, $val);
+        return $result . $this->encode($parser, $var, $val);
     }
 
     /**
@@ -259,13 +176,12 @@ abstract class Abstraction
      *
      * @param  Parser        $parser
      * @param  Node\Variable $var
-     * @param  mixed         $values
      *
      * @return string encoded string
      */
-    public function encode(Parser $parser, Node\Variable $var, $values)
+    public function encode(Parser $parser, Node\Variable $var, mixed $values)
     {
-        $values    = (array)$values;
+        $values    = (array) $values;
         $list      = isset($values[0]);
         $reserved  = $this->reserved;
         $maps      = static::$reserved_chars;
@@ -277,13 +193,13 @@ abstract class Abstraction
             $assoc_sep = $sep = ',';
         }
 
-        array_walk($values, function(&$v, $k) use ($assoc_sep, $reserved, $list, $maps) {
+        array_walk($values, function (&$v, $k) use ($assoc_sep, $reserved, $list, $maps): void {
 
             $encoded = rawurlencode($v);
 
             // assoc? encode key too
             if (!$list) {
-                $encoded = rawurlencode($k).$assoc_sep.$encoded;
+                $encoded = rawurlencode($k) . $assoc_sep . $encoded;
             }
 
             // rawurlencode is compliant with 'unreserved' set
@@ -297,7 +213,7 @@ abstract class Abstraction
                 $v = str_replace(
                     array_keys($maps),
                     $maps,
-                    $encoded
+                    $encoded,
                 );
             }
         });
@@ -310,22 +226,21 @@ abstract class Abstraction
      *
      * @param  Parser        $parser
      * @param  Node\Variable $var
-     * @param  mixed         $values
      *
      * @return string decoded string
      */
-    public function decode(Parser $parser, Node\Variable $var, $values)
+    public function decode(Parser $parser, Node\Variable $var, mixed $values)
     {
         $single = !is_array($values);
-        $values = (array)$values;
+        $values = (array) $values;
 
-        array_walk($values, function(&$v, $k) {
+        array_walk($values, function (&$v, $k): void {
             $v = rawurldecode($v);
         });
 
         return $single ? reset($values) : $values;
     }
-    
+
     /**
      * Extracts value from variable
      *
@@ -343,15 +258,13 @@ abstract class Abstraction
         switch ($options['modifier']) {
 
             case '*':
-                $data = array();
+                $data = [];
                 foreach($vals as $val) {
 
-                    if (strpos($val, '=') !== false) {
-                        list($k, $v) = explode('=', $val);
+                    if (str_contains($val, '=')) {
+                        [$k, $v] = explode('=', $val);
                         $data[$k] = $v;
-                    }
-
-                    else {
+                    } else {
                         $data[]   = $val;
                     }
                 }
@@ -360,7 +273,7 @@ abstract class Abstraction
             case ':':
                 break;
             default:
-                $data = strpos($data, $this->sep) !== false ? $vals : $value;
+                $data = str_contains($data, (string) $this->sep) ? $vals : $value;
 
         }
 
@@ -370,7 +283,7 @@ abstract class Abstraction
     public static function createById($id)
     {
         if (!isset(static::$types[$id])) {
-            throw new \Exception("Invalid operator [$id]");
+            throw new Exception("Invalid operator [$id]");
         }
 
         if (isset(static::$loaded[$id])) {
@@ -378,7 +291,7 @@ abstract class Abstraction
         }
 
         $op    = static::$types[$id];
-        $class = __NAMESPACE__.'\\'.($op['named'] ? 'Named' : 'UnNamed');
+        $class = __NAMESPACE__ . '\\' . ($op['named'] ? 'Named' : 'UnNamed');
 
         return static::$loaded[$id] = new $class($id, $op['named'], $op['sep'], $op['empty'], $op['reserved'], $op['start'], $op['first']);
     }
@@ -395,14 +308,9 @@ abstract class Abstraction
      */
     protected function getRegex()
     {
-        switch ($this->id) {
-            case '?':
-            case '&':
-            case '#':
-                return self::$queryRegex;
-            case ';':
-            default:
-                return self::$pathRegex;
-        }
+        return match ($this->id) {
+            '?', '&', '#' => self::$queryRegex,
+            default => self::$pathRegex,
+        };
     }
 }

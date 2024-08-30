@@ -9,36 +9,28 @@ use Rize\UriTemplate\Parser;
  */
 class UriTemplate
 {
-             /**
-              * @var Parser
-              */
-    protected $parser,
-              $parsed = array(),
-              $base_uri,
-              $params = array();
+    /**
+     * @var Parser
+    */
+    protected Parser $parser;
+    protected array $parsed = [];
 
-    public function __construct($base_uri = '', $params = array(), Parser $parser = null)
+    public function __construct(protected string $base_uri = '', protected array $params = [], ?Parser $parser = null)
     {
-        $this->base_uri = $base_uri;
-        $this->params   = $params;
         $this->parser   = $parser ?: $this->createNodeParser();
     }
 
     /**
      * Expands URI Template
-     *
-     * @param string $uri  URI Template
-     * @param array  $params        URI Template's parameters
-     * @return string
      */
-    public function expand($uri, $params = array())
+    public function expand(string $uri, $params = []): string
     {
         $params += $this->params;
-        $uri     = $this->base_uri.$uri;
-        $result  = array();
+        $uri     = $this->base_uri . $uri;
+        $result  = [];
 
         // quick check
-        if (($start = strpos($uri, '{')) === false) {
+        if (!str_contains($uri, '{')) {
             return $uri;
         }
 
@@ -54,15 +46,11 @@ class UriTemplate
 
     /**
      * Extracts variables from URI
-     *
-     * @param  string $template
-     * @param  string $uri
-     * @param  bool   $strict  This will perform a full match
      * @return null|array params or null if not match and $strict is true
      */
-    public function extract($template, $uri, $strict = false)
+    public function extract(string $template, string $uri, bool $strict = false): ?array
     {
-        $params = array();
+        $params = [];
         $nodes  = $this->parser->parse($template);
 
         # PHP 8.1.0RC4-dev still throws deprecation warning for `strlen`.
@@ -78,7 +66,7 @@ class UriTemplate
             // uri'll be truncated from the start when a match is found
             $match = $node->match($this->parser, $uri, $params, $strict);
 
-            list($uri, $params) = $match;
+            [$uri, $params] = $match;
         }
 
         // if there's remaining $uri, matching is failed
@@ -89,12 +77,12 @@ class UriTemplate
         return $params;
     }
 
-    public function getParser()
+    public function getParser(): Parser
     {
         return $this->parser;
     }
 
-    protected function createNodeParser()
+    protected function createNodeParser(): Parser
     {
         static $parser;
 
@@ -102,6 +90,6 @@ class UriTemplate
             return $parser;
         }
 
-        return $parser = new Parser;
+        return $parser = new Parser();
     }
 }

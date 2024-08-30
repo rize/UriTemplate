@@ -2,6 +2,7 @@
 
 namespace Rize\UriTemplate\Operator;
 
+use Exception;
 use Rize\UriTemplate\Node;
 use Rize\UriTemplate\Parser;
 
@@ -13,9 +14,8 @@ use Rize\UriTemplate\Parser;
  */
 class UnNamed extends Abstraction
 {
-    public function toRegex(Parser $parser, Node\Variable $var)
+    public function toRegex(Parser $parser, Node\Variable $var): string
     {
-        $regex   = null;
         $value   = $this->getRegex();
         $options = $var->options;
 
@@ -26,16 +26,14 @@ class UnNamed extends Abstraction
                     $regex = "{$value}+(?:{$this->sep}{$value}+)*";
                     break;
                 case ':':
-                    $regex = $value.'{0,'.$options['value'].'}';
+                    $regex = $value . '{0,' . $options['value'] . '}';
                     break;
                 case '%':
-                    throw new \Exception("% (array) modifier only works with Named type operators e.g. ;,?,&");
+                    throw new Exception("% (array) modifier only works with Named type operators e.g. ;,?,&");
                 default:
-                    throw new \Exception("Unknown modifier `{$options['modifier']}`");
+                    throw new Exception("Unknown modifier `{$options['modifier']}`");
             }
-        }
-
-        else {
+        } else {
             // 1, 3
             $regex = "{$value}*(?:,{$value}+)*";
         }
