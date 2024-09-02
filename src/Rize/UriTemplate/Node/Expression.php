@@ -2,70 +2,53 @@
 
 namespace Rize\UriTemplate\Node;
 
-use Rize\UriTemplate\Parser;
 use Rize\UriTemplate\Operator;
+use Rize\UriTemplate\Parser;
 
-/**
- * Description
- */
 class Expression extends Abstraction
 {
     /**
      * @param string $forwardLookupSeparator
      */
-    public function __construct($token, private readonly Operator\Abstraction $operator, private readonly ?array $variables = null, /**
-     * Whether to do a forward lookup for a given separator
+    public function __construct(string $token, private readonly Operator\Abstraction $operator, private readonly ?array $variables = null, /**
+     * Whether to do a forward lookup for a given separator.
      */
         private $forwardLookupSeparator = null)
     {
         parent::__construct($token);
     }
 
-    /**
-     * @return Operator\Abstraction
-     */
-    public function getOperator()
+    public function getOperator(): Operator\Abstraction
     {
         return $this->operator;
     }
 
-    /**
-     * @return array
-     */
-    public function getVariables()
+    public function getVariables(): ?array
     {
         return $this->variables;
     }
 
-    /**
-     * @return string
-     */
-    public function getForwardLookupSeparator()
+    public function getForwardLookupSeparator(): string
     {
         return $this->forwardLookupSeparator;
     }
 
-    /**
-     * @param string $forwardLookupSeparator
-     */
-    public function setForwardLookupSeparator($forwardLookupSeparator)
+    public function setForwardLookupSeparator(string $forwardLookupSeparator): void
     {
         $this->forwardLookupSeparator = $forwardLookupSeparator;
     }
 
-    /**
-     * @param Parser $parser
-     * @param array $params
-     * @return null|string
-     */
     public function expand(Parser $parser, array $params = []): ?string
     {
         $data = [];
-        $op   = $this->operator;
+        $op = $this->operator;
+
+        if ($this->variables === null) {
+            return $op->first;
+        }
 
         // check for variable modifiers
-        foreach($this->variables as $var) {
-
+        foreach ($this->variables as $var) {
             $val = $op->expand($parser, $var, $params);
 
             // skip null value
@@ -78,7 +61,7 @@ class Expression extends Abstraction
     }
 
     /**
-     * Matches given URI against current node
+     * Matches given URI against current node.
      *
      * @return null|array `uri and params` or `null` if not match and $strict is true
      */
@@ -96,7 +79,7 @@ class Expression extends Abstraction
             $uri = substr($uri, 1);
         }
 
-        foreach($this->sortVariables($this->variables) as $var) {
+        foreach ($this->sortVariables($this->variables) as $var) {
             $regex = '#' . $op->toRegex($parser, $var) . '#';
             $val   = null;
 
@@ -110,7 +93,6 @@ class Expression extends Abstraction
             }
 
             if (preg_match($regex, $preparedUri, $match)) {
-
                 // remove matched part from input
                 $preparedUri = preg_replace($regex, '', $preparedUri, 1);
                 $val = $op->extract($parser, $var, $match[0]);
@@ -132,13 +114,10 @@ class Expression extends Abstraction
     /**
      * Sort variables before extracting data from uri.
      * We have to sort vars by non-explode to explode.
-     *
-     * @param array $vars
-     * @return array
      */
-    protected function sortVariables(array $vars)
+    protected function sortVariables(array $vars): array
     {
-        usort($vars, fn($a, $b) => $a->options['modifier'] >= $b->options['modifier'] ? 1 : -1);
+        usort($vars, static fn($a, $b) => $a->options['modifier'] <=> $b->options['modifier']);
 
         return $vars;
     }
