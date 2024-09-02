@@ -5,15 +5,16 @@ namespace Rize\UriTemplate\Node;
 use Rize\UriTemplate\Parser;
 
 /**
- * Base class for all Nodes
+ * Base class for all Nodes.
  */
 abstract class Abstraction
 {
-    public function __construct(private string $token) {}
+    public function __construct(private readonly string $token) {}
 
     /**
-     * @param array<string, mixed> $params
      * Expands URI template
+     *
+     * @param array<string, mixed> $params
      */
     public function expand(Parser $parser, array $params = []): ?string
     {
@@ -21,17 +22,17 @@ abstract class Abstraction
     }
 
     /**
-     * Matches given URI against current node
+     * Matches given URI against current node.
      *
      * @param array<string, mixed> $params
+     *
      * @return null|array{0: string, 1: array<string, mixed>} `uri and params` or `null` if not match and $strict is true
      */
     public function match(Parser $parser, string $uri, array $params = [], bool $strict = false): ?array
     {
         // match literal string from start to end
-        $length = strlen($this->token);
-        if (strpos($uri, $this->token) === 0) {
-            $uri = substr($uri, $length);
+        if (str_starts_with($uri, $this->token)) {
+            $uri = substr($uri, strlen($this->token));
         }
 
         // when there's no match, just return null if strict mode is given

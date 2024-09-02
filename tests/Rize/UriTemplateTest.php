@@ -162,15 +162,15 @@ class UriTemplateTest extends TestCase
         $files   = ['spec-examples.json', 'spec-examples-by-section.json', 'extended-tests.json'];
         $service = $this->service();
 
-        foreach($files as $file) {
+        foreach ($files as $file) {
             $content = json_decode(file_get_contents($dir . $file), $array = true);
 
             # iterate through each fixture
-            foreach($content as $fixture) {
+            foreach ($content as $fixture) {
                 $vars = $fixture['variables'];
 
                 # assert each test cases
-                foreach($fixture['testcases'] as $case) {
+                foreach ($fixture['testcases'] as $case) {
                     [$uri, $expected] = $case;
 
                     $actual = $service->expand($uri, $vars);

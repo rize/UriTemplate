@@ -2,7 +2,6 @@
 
 namespace Rize\UriTemplate\Operator;
 
-use Exception;
 use Rize\UriTemplate\Node;
 use Rize\UriTemplate\Parser;
 
@@ -11,7 +10,7 @@ use Rize\UriTemplate\Parser;
  * | 2   |    {?list*}   ?list=red&list=green&list=blue       | {name}+=(?:{$value}+(?:{sep}{name}+={$value}*))*
  * | 3   |    {?keys}    ?keys=semi,%3B,dot,.,comma,%2C       | (same as 1)
  * | 4   |    {?keys*}   ?semi=%3B&dot=.&comma=%2C            | (same as 2)
- * | 5   |    {?list*}   ?list[]=red&list[]=green&list[]=blue | {name[]}+=(?:{$value}+(?:{sep}{name[]}+={$value}*))*
+ * | 5   |    {?list*}   ?list[]=red&list[]=green&list[]=blue | {name[]}+=(?:{$value}+(?:{sep}{name[]}+={$value}*))*.
  */
 class Named extends Abstraction
 {
@@ -22,23 +21,28 @@ class Named extends Abstraction
         $options = $var->options;
 
         if ($options['modifier']) {
-            switch($options['modifier']) {
+            switch ($options['modifier']) {
                 case '*':
                     // 2 | 4
                     $regex = "{$name}+=(?:{$value}+(?:{$this->sep}{$name}+={$value}*)*)"
                            . "|{$value}+=(?:{$value}+(?:{$this->sep}{$value}+={$value}*)*)";
+
                     break;
+
                 case ':':
-                    $regex = "{$value}\{0,{$options['value']}\}";
+                    $regex = "{$value}\\{0,{$options['value']}\\}";
+
                     break;
 
                 case '%':
                     // 5
-                    $name  = $name . '+(?:%5B|\[)[^=]*=';
+                    $name .= '+(?:%5B|\[)[^=]*=';
                     $regex = "{$name}(?:{$value}+(?:{$this->sep}{$name}{$value}*)*)";
+
                     break;
+
                 default:
-                    throw new Exception("Unknown modifier `{$options['modifier']}`");
+                    throw new \InvalidArgumentException("Unknown modifier `{$options['modifier']}`");
             }
         } else {
             // 1, 3
@@ -48,7 +52,7 @@ class Named extends Abstraction
         return '(?:&)?' . $regex;
     }
 
-    public function expandString(Parser $parser, Node\Variable $var, $val)
+    public function expandString(Parser $parser, Node\Variable $var, $val): string
     {
         $val     = (string) $val;
         $options = $var->options;
@@ -57,9 +61,9 @@ class Named extends Abstraction
         // handle empty value
         if ($val === '') {
             return $result . $this->empty;
-        } else {
-            $result .= '=';
         }
+
+        $result .= '=';
 
         if ($options['modifier'] === ':') {
             $val = mb_substr($val, 0, (int) $options['value']);
@@ -68,29 +72,28 @@ class Named extends Abstraction
         return $result . $this->encode($parser, $var, $val);
     }
 
-    public function expandNonExplode(Parser $parser, Node\Variable $var, array $val)
+    public function expandNonExplode(Parser $parser, Node\Variable $var, array $val): ?string
     {
         if (empty($val)) {
             return null;
         }
 
-        $result  = $this->encode($parser, $var, $var->name);
+        $result = $this->encode($parser, $var, $var->name);
 
         $result .= '=';
 
         return $result . $this->encode($parser, $var, $val);
     }
 
-    public function expandExplode(Parser $parser, Node\Variable $var, array $val)
+    public function expandExplode(Parser $parser, Node\Variable $var, array $val): ?string
     {
         if (empty($val)) {
             return null;
         }
 
-        $list  = isset($val[0]);
-        $data  = [];
-        foreach($val as $k => $v) {
-
+        $list = isset($val[0]);
+        $data = [];
+        foreach ($val as $k => $v) {
             // if value is a list, use `varname` as keyname, otherwise use `key` name
             $key = $list ? $var->name : $k;
             if ($list) {
@@ -107,10 +110,10 @@ class Named extends Abstraction
             $data = [$var->name => $data];
         }
 
-        return $this->encodeExplodeVars($parser, $var, $data);
+        return $this->encodeExplodeVars($var, $data);
     }
 
-    public function extract(Parser $parser, Node\Variable $var, $data)
+    public function extract(Parser $parser, Node\Variable $var, $data): array|string
     {
         // get rid of optional `&` at the beginning
         if ($data[0] === '&') {
@@ -123,45 +126,47 @@ class Named extends Abstraction
 
         switch ($options['modifier']) {
             case '%':
-                parse_str($data, $query);
+                parse_str($value, $query);
 
                 return $query[$var->name];
 
             case '*':
-                $data = [];
+                $value = [];
 
-                foreach($vals as $val) {
+                foreach ($vals as $val) {
                     [$k, $v] = explode('=', $val);
 
                     // 2
                     if ($k === $var->getToken()) {
-                        $data[]   = $v;
+                        $value[] = $v;
                     }
 
                     // 4
                     else {
-                        $data[$k] = $v;
+                        $value[$k] = $v;
                     }
                 }
 
                 break;
+
             case ':':
                 break;
+
             default:
                 // 1, 3
                 // remove key from value e.g. 'lang=en,th' becomes 'en,th'
                 $value = str_replace($var->getToken() . '=', '', $value);
-                $data  = explode(',', $value);
+                $value = explode(',', $value);
 
-                if (sizeof($data) === 1) {
-                    $data = current($data);
+                if (count($value) === 1) {
+                    $value = current($value);
                 }
         }
 
-        return $this->decode($parser, $var, $data);
+        return $this->decode($parser, $var, $value);
     }
 
-    public function encodeExplodeVars(Parser $parser, Node\Variable $var, $data)
+    public function encodeExplodeVars(Node\Variable $var, $data): null|array|string
     {
         // http_build_query uses PHP_QUERY_RFC1738 encoding by default
         // i.e. spaces are encoded as '+' (plus signs) we need to convert
@@ -178,7 +183,6 @@ class Named extends Abstraction
 
         // `:`, `*` modifiers
         else {
-
             // by default, http_build_query will convert array values to `a[]=1&a[]=2`
             // which is different from the spec. It should be `a=1&a=2`
             $query = preg_replace('#%5B\d+%5D#', '', $query);
@@ -186,7 +190,6 @@ class Named extends Abstraction
 
         // handle reserved charset
         if ($this->reserved) {
-
             $query = str_replace(
                 array_keys(static::$reserved_chars),
                 static::$reserved_chars,
