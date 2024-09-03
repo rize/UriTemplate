@@ -10,7 +10,46 @@ on:
   workflow_dispatch:
 
 jobs:
-  tests-php8:
+  cs-fix:
+    name: CS Fixer
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Run CS Fixer
+      run: composer run-script cs
+
+  phpstan:
+    name: PHPStan
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Run CS Fixer
+      run: composer run-script phpstan
+
+  tests:
+    name: PHPUnit on PHP ${{ matrix.php-versions }}
     runs-on: ubuntu-22.04
 
     strategy:

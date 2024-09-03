@@ -10,7 +10,6 @@ use Rize\UriTemplate\UriTemplate;
  *
  * http://tools.ietf.org/html/rfc6570
  */
-#[Covers(UrlTemplate::class)]
 class UriTemplateTest extends TestCase
 {
     public function service($uri = '', $params = [])

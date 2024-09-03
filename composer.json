@@ -25,6 +25,8 @@
     },
     "scripts": {
         "test": "vendor/bin/phpunit",
-        "cs-fix": "vendor/bin/php-cs-fixer fix"
+        "cs": "vendor/bin/php-cs-fixer fix --dry-run",
+        "cs-fix": "vendor/bin/php-cs-fixer fix",
+        "phpstan": "vendor/bin/phpstan"
     }
 }
