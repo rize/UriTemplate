@@ -61,9 +61,94 @@ abstract class Abstraction
     /**
      * gen-delims | sub-delims.
      */
-    public static $reserved_chars = ['%3A' => ':', '%2F' => '/', '%3F' => '?', '%23' => '#', '%5B' => '[', '%5D' => ']', '%40' => '@', '%21' => '!', '%24' => '$', '%26' => '&', '%27' => "'", '%28' => '(', '%29' => ')', '%2A' => '*', '%2B' => '+', '%2C' => ',', '%3B' => ';', '%3D' => '='];
+    public static $reserved_chars = [
+        '%3A' => ':',
+        '%2F' => '/',
+        '%3F' => '?',
+        '%23' => '#',
+        '%5B' => '[',
+        '%5D' => ']',
+        '%40' => '@',
+        '%21' => '!',
+        '%24' => '$',
+        '%26' => '&',
+        '%27' => "'",
+        '%28' => '(',
+        '%29' => ')',
+        '%2A' => '*',
+        '%2B' => '+',
+        '%2C' => ',',
+        '%3B' => ';',
+        '%3D' => '=',
+    ];
 
-    protected static $types = ['' => ['sep' => ',', 'named' => false, 'empty' => '', 'reserved' => false, 'start' => 0, 'first' => null], '+' => ['sep' => ',', 'named' => false, 'empty' => '', 'reserved' => true, 'start' => 1, 'first' => null], '.' => ['sep' => '.', 'named' => false, 'empty' => '', 'reserved' => false, 'start' => 1, 'first' => '.'], '/' => ['sep' => '/', 'named' => false, 'empty' => '', 'reserved' => false, 'start' => 1, 'first' => '/'], ';' => ['sep' => ';', 'named' => true, 'empty' => '', 'reserved' => false, 'start' => 1, 'first' => ';'], '?' => ['sep' => '&', 'named' => true, 'empty' => '=', 'reserved' => false, 'start' => 1, 'first' => '?'], '&' => ['sep' => '&', 'named' => true, 'empty' => '=', 'reserved' => false, 'start' => 1, 'first' => '&'], '#' => ['sep' => ',', 'named' => false, 'empty' => '', 'reserved' => true, 'start' => 1, 'first' => '#']];
+    protected static $types = [
+        '' => [
+            'sep' => ',',
+            'named' => false,
+            'empty' => '',
+            'reserved' => false,
+            'start' => 0,
+            'first' => null,
+        ],
+        '+' => [
+            'sep' => ',',
+            'named' => false,
+            'empty' => '',
+            'reserved' => true,
+            'start' => 1,
+            'first' => null,
+        ],
+        '.' => [
+            'sep' => '.',
+            'named' => false,
+            'empty' => '',
+            'reserved' => false,
+            'start' => 1,
+            'first' => '.',
+        ],
+        '/' => [
+            'sep' => '/',
+            'named' => false,
+            'empty' => '',
+            'reserved' => false,
+            'start' => 1,
+            'first' => '/',
+        ],
+        ';' => [
+            'sep' => ';',
+            'named' => true,
+            'empty' => '',
+            'reserved' => false,
+            'start' => 1,
+            'first' => ';',
+        ],
+        '?' => [
+            'sep' => '&',
+            'named' => true,
+            'empty' => '=',
+            'reserved' => false,
+            'start' => 1,
+            'first' => '?',
+        ],
+        '&' => [
+            'sep' => '&',
+            'named' => true,
+            'empty' => '=',
+            'reserved' => false,
+            'start' => 1,
+            'first' => '&',
+        ],
+        '#' => [
+            'sep' => ',',
+            'named' => false,
+            'empty' => '',
+            'reserved' => true,
+            'start' => 1,
+            'first' => '#',
+        ],
+    ];
+
     protected static $loaded = [];
 
     /**
