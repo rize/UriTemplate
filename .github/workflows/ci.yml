@@ -10,13 +10,9 @@ on:
   workflow_dispatch:
 
 jobs:
-  tests:
-    runs-on: ubuntu-20.04
-
-    strategy:
-      fail-fast: true
-      matrix:
-        php-versions: ['7.3', '7.4']
+  cs-fix:
+    name: CS Fixer
+    runs-on: ubuntu-22.04
 
     steps:
     - name: Checkout
@@ -25,16 +21,36 @@ jobs:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: ${{ matrix.php-versions }}
+        php-version: '8.1'
 
     - name: Install dependencies
-      run: composer install --optimize-autoloader --prefer-dist
+      run: composer install
 
-    - name: Run tests
-      run: composer run-script test
+    - name: Run CS Fixer
+      run: composer run-script cs
 
-  tests-php8:
-    runs-on: ubuntu-20.04
+  phpstan:
+    name: PHPStan
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.1'
+
+    - name: Install dependencies
+      run: composer install
+
+    - name: Run CS Fixer
+      run: composer run-script phpstan
+
+  tests:
+    name: PHPUnit on PHP ${{ matrix.php-versions }}
+    runs-on: ubuntu-22.04
 
     strategy:
       fail-fast: true
@@ -51,7 +67,7 @@ jobs:
         php-version: ${{ matrix.php-versions }}
 
     - name: Install dependencies
-      run: composer require -W phpunit/phpunit
+      run: composer install
 
     - name: Run tests
       run: composer run-script test
