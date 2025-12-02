@@ -67,7 +67,9 @@ class Parser
             }
 
             // default operator
-            $prefix = null;
+            //
+            // PHP 8.5: using null as array offset is deprecated and we no longer rely on auto-casting null to ''.
+            $prefix = '';
         }
 
         // remove operator prefix if exists e.g. '?'
