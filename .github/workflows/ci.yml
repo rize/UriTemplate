@@ -7,12 +7,14 @@ on:
   pull_request:
     branches:
     - master
+  schedule:
+    - cron: '0 0 1 * *' # Run monthly
   workflow_dispatch:
 
 jobs:
   cs-fix:
     name: CS Fixer
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -21,7 +23,7 @@ jobs:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1'
+        php-version: 'highest'
 
     - name: Install dependencies
       run: composer install
@@ -31,7 +33,7 @@ jobs:
 
   phpstan:
     name: PHPStan
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -40,7 +42,7 @@ jobs:
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
-        php-version: '8.1'
+        php-version: 'highest'
 
     - name: Install dependencies
       run: composer install
@@ -50,12 +52,12 @@ jobs:
 
   tests:
     name: PHPUnit on PHP ${{ matrix.php-versions }}
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: true
       matrix:
-        php-versions: ['8.1', '8.2', '8.3', '8.4']
+        php-versions: ['8.1', '8.2', '8.3', 'highest']
 
     steps:
     - name: Checkout
