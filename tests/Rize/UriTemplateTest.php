@@ -184,6 +184,91 @@ class UriTemplateTest extends TestCase
         }
     }
 
+    public static function dataPrefixModifierMultibyte()
+    {
+        $params = ['greek' => 'αβγδε', 'clef' => '𝄞stave'];
+
+        # RFC 6570 s2.4.1: max-length counts characters, not octets
+        return [
+            ['%CE%B1%CE%B2', '{greek:2}', $params],
+            ['%CE%B1%CE%B2', '{+greek:2}', $params],
+            ['#%CE%B1%CE%B2', '{#greek:2}', $params],
+            ['.%CE%B1%CE%B2', '{.greek:2}', $params],
+            ['/%CE%B1%CE%B2', '{/greek:2}', $params],
+            [';greek=%CE%B1%CE%B2', '{;greek:2}', $params],
+            ['?greek=%CE%B1%CE%B2', '{?greek:2}', $params],
+            ['&greek=%CE%B1%CE%B2', '{&greek:2}', $params],
+            ['%F0%9D%84%9Es', '{clef:2}', $params],
+        ];
+    }
+
+    #[DataProvider('dataPrefixModifierMultibyte')]
+    public function testPrefixModifierMultibyte(string $expected, string $template, array $params)
+    {
+        $this->assertSame($expected, $this->service()->expand($template, $params));
+    }
+
+    public static function dataReservedPctTriplets()
+    {
+        $params = [
+            'id'      => 'admin%2F',
+            'not_pct' => '%foo',
+            'list'    => ['red%25', '%2Fgreen'],
+            'keys'    => ['key%2F' => 'val%2F'],
+        ];
+
+        # RFC 6570 s3.2.3: pct-encoded triplets pass through reserved/fragment expansion
+        return [
+            ['admin%2F', '{+id}', $params],
+            ['#admin%2F', '{#id}', $params],
+            ['red%25,%2Fgreen', '{+list}', $params],
+            ['#red%25,%2Fgreen', '{#list}', $params],
+            ['key%2F,val%2F', '{+keys}', $params],
+            # a prefix cut mid-triplet leaves no triplet to preserve
+            ['admin%25', '{+id:6}', $params],
+            # a bare '%' is not a triplet and must still be encoded
+            ['%25foo', '{+not_pct}', $params],
+            # simple expansion still encodes '%' itself
+            ['admin%252F', '{id}', $params],
+            ['key%252F,val%252F', '{keys}', $params],
+        ];
+    }
+
+    #[DataProvider('dataReservedPctTriplets')]
+    public function testReservedPctTriplets(string $expected, string $template, array $params)
+    {
+        $this->assertSame($expected, $this->service()->expand($template, $params));
+    }
+
+    public static function dataPctEncodedVarname()
+    {
+        # RFC 6570 s2.3: varname may contain pct-encoded triplets; they are emitted as-is
+        return [
+            ['?Stra%C3%9Fe=Gr%C3%BCner%20Weg', '{?Stra%C3%9Fe}', ['Stra%C3%9Fe' => 'Grüner Weg']],
+            [';Stra%C3%9Fe=x', '{;Stra%C3%9Fe}', ['Stra%C3%9Fe' => 'x']],
+            ['?Stra%C3%9Fe=a&Stra%C3%9Fe=b', '{?Stra%C3%9Fe*}', ['Stra%C3%9Fe' => ['a', 'b']]],
+            ['?Stra%C3%9Fe=a,b', '{?Stra%C3%9Fe}', ['Stra%C3%9Fe' => ['a', 'b']]],
+        ];
+    }
+
+    #[DataProvider('dataPctEncodedVarname')]
+    public function testPctEncodedVarname(string $expected, string $template, array $params)
+    {
+        $this->assertSame($expected, $this->service()->expand($template, $params));
+    }
+
+    public function testLiteralNonAsciiEncoding()
+    {
+        $service = $this->service();
+
+        # RFC 6570 s3.1: non-ASCII literal text is pct-encoded on expansion
+        $this->assertSame('caf%C3%A9/value', $service->expand('café/{var}', ['var' => 'value']));
+
+        # extraction accepts the encoded form that expand produces
+        $this->assertSame(['var' => 'value'], $service->extract('café/{var}', 'caf%C3%A9/value'));
+        $this->assertSame(['var' => 'value'], $service->extract('café/{var}', 'café/value'));
+    }
+
     public static function dataExtractStrictMode()
     {
         $dataTest = [['/search/{term:1}/{term}/{?q*,limit}', '/search/j/john/?a=1&b=2&limit=10', ['term:1' => 'j', 'term' => 'john', 'limit' => '10', 'q' => ['a' => '1', 'b' => '2']]], ['http://example.com/{term:1}/{term}/search{?q*,lang}', 'http://example.com/j/john/search?q=Hello%20World%21&q=3&lang=th,jp,en', ['term:1' => 'j', 'term' => 'john', 'lang' => ['th', 'jp', 'en'], 'q' => ['Hello World!', '3']]], ['/foo/bar/{number}', '/foo/bar/0', ['number' => 0]], ['/', '/', []]];

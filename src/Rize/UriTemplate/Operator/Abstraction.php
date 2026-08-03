@@ -214,7 +214,7 @@ abstract class Abstraction
         $result  = null;
 
         if ($options['modifier'] === ':') {
-            $val = substr($val, 0, (int) $options['value']);
+            $val = mb_substr($val, 0, (int) $options['value']);
         }
 
         return $result . $this->encode($parser, $var, $val);
@@ -264,29 +264,41 @@ abstract class Abstraction
         }
 
         array_walk($values, function (&$v, $k) use ($assoc_sep, $reserved, $list, $maps): void {
-            $encoded = rawurlencode($v);
+            // reserved operators pass pct-encoded triplets through unchanged
+            $encoded = $reserved
+                ? static::pctEncode((string) $v, $maps)
+                : rawurlencode((string) $v);
 
             // assoc? encode key too
             if (!$list) {
-                $encoded = rawurlencode($k) . $assoc_sep . $encoded;
+                $key     = $reserved ? static::pctEncode((string) $k, $maps) : rawurlencode((string) $k);
+                $encoded = $key . $assoc_sep . $encoded;
             }
 
-            // rawurlencode is compliant with 'unreserved' set
-            if (!$reserved) {
-                $v = $encoded;
-            }
-
-            // decode chars in reserved set
-            else {
-                $v = str_replace(
-                    array_keys($maps),
-                    $maps,
-                    $encoded,
-                );
-            }
+            $v = $encoded;
         });
 
         return implode($sep, $values);
+    }
+
+    /**
+     * Pct-encodes a string but keeps valid pct-encoded triplets intact.
+     * `$maps` restores reserved chars from their encoded form.
+     */
+    public static function pctEncode(string $value, array $maps = []): string
+    {
+        $result = '';
+        foreach (preg_split('#(%[0-9A-Fa-f]{2})#', $value, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY) as $part) {
+            if (preg_match('#\A%[0-9A-Fa-f]{2}\z#', $part)) {
+                $result .= $part;
+                continue;
+            }
+
+            $encoded = rawurlencode($part);
+            $result .= $maps ? str_replace(array_keys($maps), $maps, $encoded) : $encoded;
+        }
+
+        return $result;
     }
 
     /**

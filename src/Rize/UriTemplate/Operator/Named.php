@@ -56,7 +56,7 @@ class Named extends Abstraction
     {
         $val     = (string) $val;
         $options = $var->options;
-        $result  = $this->encode($parser, $var, $var->name);
+        $result  = static::pctEncode($var->name);
 
         // handle empty value
         if ($val === '') {
@@ -78,7 +78,7 @@ class Named extends Abstraction
             return null;
         }
 
-        $result = $this->encode($parser, $var, $var->name);
+        $result = static::pctEncode($var->name);
 
         $result .= '=';
 
@@ -195,6 +195,13 @@ class Named extends Abstraction
                 static::$reserved_chars,
                 $query,
             );
+        }
+
+        // keep pct-encoded triplets in the variable name intact
+        $name = rawurlencode($var->name);
+        if ($name !== ($pct_name = static::pctEncode($var->name))) {
+            $needles = $var->options['modifier'] === '%' ? [$name . '=', $name . '%5B'] : [$name . '='];
+            $query   = str_replace($needles, str_replace($name, $pct_name, $needles), $query);
         }
 
         return $query;

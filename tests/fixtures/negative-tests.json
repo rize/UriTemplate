@@ -50,7 +50,14 @@
             [ "/{default-graph-uri}", false ],
             [ "/sparql{?query,default-graph-uri}", false ],
             [ "/sparql{?query){&default-graph-uri*}", false ],
-            [ "/resolution{?x, y}" , false ]
+            [ "/resolution{?x, y}", false ],
+            [ "{var:0}", false ],
+            [ "{var:01}", false ],
+            [ "{var:10000}", false ],
+            [ "{var:}", false ],
+            [ "{x.}", false ],
+            [ "{x..y}", false ],
+            [ "{%2x}", false ]
 
         ]
     }

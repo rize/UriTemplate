@@ -8,6 +8,7 @@
      },
      "testcases" : [
         ["{var}", "value"],
+        ["'{var}'", "'value'"],
         ["{hello}", "Hello%20World%21"]
      ]
   },
